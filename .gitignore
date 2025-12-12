@@ -1,0 +1,16 @@
+.DS_Store
+
+# Ignore node_modules and build directories
+node_modules
+build
+dist
+
+# Log files
+*.log
+npm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Local files
+*.local
