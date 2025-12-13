@@ -19,9 +19,9 @@ export interface DesignViewProps {
 
 const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
   const { value, selection } = useStore(editor.stateStore);
-  const selectedShape = selection ? value.shapes[selection.id] : null;
-  const selectedText = selection ? value.texts[selection.id] : null;
-  const selectedImage = selection ? value.images[selection.id] : null;
+  const selectedShape = selection && value?.shapes ? value.shapes[selection.id] : null;
+  const selectedText = selection && value?.texts ? value.texts[selection.id] : null;
+  const selectedImage = selection && value?.images ? value.images[selection.id] : null;
   const selectedElement = selectedShape || selectedText || selectedImage;
 
   const { onDragStart, dragProps } = useDragGesture<Element>({
@@ -49,16 +49,16 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
     },
   });
 
-  const shapes = Object.values(value.shapes);
-  const texts = Object.values(value.texts);
-  const images = Object.values(value.images);
+  const shapes = Object.values(value?.shapes || {});
+  const texts = Object.values(value?.texts || {});
+  const images = Object.values(value?.images || {});
 
   return (
     <div
       tabIndex={-1}
       style={{
-        width: value.attributes.width,
-        height: value.attributes.height,
+        width: value?.attributes?.width || 800,
+        height: value?.attributes?.height || 600,
         position: "relative",
         userSelect: "none",
       }}
