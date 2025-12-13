@@ -19,6 +19,8 @@ export interface DesignViewProps {
 
 const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
   const { value, selection } = useStore(editor.stateStore);
+  const isDoubleClickingRef = useRef(false);
+  const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const selectedShape = selection && value?.shapes ? value.shapes[selection.id] : null;
   const selectedText = selection && value?.texts ? value.texts[selection.id] : null;
   const selectedImage = selection && value?.images ? value.images[selection.id] : null;
@@ -161,13 +163,63 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
               width: text.bounds.width,
               height: text.bounds.height,
               pointerEvents: "auto",
-              userSelect: "none",
+              userSelect: "auto",
             }}
             onPointerDown={(event) => {
+              const target = event.target as HTMLElement;
+              if (target.tagName === 'INPUT' || isDoubleClickingRef.current) {
+                return; // Don't interfere with text editing or double clicking
+              }
+
+              // Clear any existing timeout
+              if (dragTimeoutRef.current) {
+                clearTimeout(dragTimeoutRef.current);
+                dragTimeoutRef.current = null;
+              }
+
               event.stopPropagation();
               const newSelection: Selection = { id: text.id };
               editor.setSelection(newSelection);
-              onDragStart(event, text);
+
+              // Store event data for delayed drag start
+              const eventData = {
+                clientX: event.clientX,
+                clientY: event.clientY,
+                currentTarget: event.currentTarget,
+                pointerId: event.pointerId,
+                buttons: event.buttons
+              };
+
+              // Delay drag start to allow double click detection
+              dragTimeoutRef.current = setTimeout(() => {
+                if (!isDoubleClickingRef.current && eventData.buttons === 1) {
+                  // Create a synthetic event-like object for onDragStart
+                  const syntheticEvent = {
+                    clientX: eventData.clientX,
+                    clientY: eventData.clientY,
+                    currentTarget: eventData.currentTarget,
+                    pointerId: eventData.pointerId,
+                    buttons: eventData.buttons
+                  };
+                  onDragStart(syntheticEvent as any, text);
+                }
+                dragTimeoutRef.current = null;
+              }, 250);
+            }}
+            onDoubleClick={(event) => {
+              isDoubleClickingRef.current = true;
+
+              // Clear any pending drag operation
+              if (dragTimeoutRef.current) {
+                clearTimeout(dragTimeoutRef.current);
+                dragTimeoutRef.current = null;
+              }
+
+              // Don't stop propagation - let TextNode handle the double click
+              // Reset flag after double click is processed
+              setTimeout(() => {
+                isDoubleClickingRef.current = false;
+              }, 300);
             }}
           >
             <TextNode
