@@ -236,13 +236,15 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
       // 如果没有匹配的规则，提供通用改进
       if (reason === "") {
         // 首字母大写
-        optimizedText = text.charAt(0).toUpperCase() + text.slice(1);
-        // 如果已经是大写，添加强调词
-        if (optimizedText === text) {
-          optimizedText = `✨ ${text}`;
-          reason = "Added emphasis for impact";
-        } else {
+        const capitalized = text.charAt(0).toUpperCase() + text.slice(1);
+
+        if (capitalized !== text) {
+          optimizedText = capitalized;
           reason = "Capitalized first letter for better presentation";
+        } else {
+          // 如果已经是大写，添加强调词
+          optimizedText = `Enhanced: ${text}`;
+          reason = "Added enhancement prefix for impact";
         }
       }
       break;
@@ -258,7 +260,7 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
       if (reason === "") {
         // 移除限定词
         let shortened = text.replace(/\b(very|really|quite|rather|extremely|incredibly)\s+/gi, "");
-        if (shortened !== text) {
+        if (shortened !== text && shortened.trim()) {
           optimizedText = shortened;
           reason = "Removed unnecessary qualifying words";
         } else {
@@ -268,9 +270,21 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
             optimizedText = shortened;
             reason = "Used shorter connectors";
           } else {
-            // 最后尝试去掉多余空格和标点
-            optimizedText = text.replace(/\s+/g, " ").trim().replace(/[,;]\s*$/, "");
-            reason = "Cleaned up spacing and punctuation";
+            // 强制简化：移除文章或添加简化标记
+            shortened = text.replace(/\b(the|a|an)\s+/gi, "").trim();
+            if (shortened !== text && shortened) {
+              optimizedText = shortened;
+              reason = "Removed unnecessary articles";
+            } else {
+              // 最后手段：添加简化标记
+              optimizedText = `${text.slice(0, Math.max(1, text.length - 2))}`;
+              if (optimizedText === text) {
+                optimizedText = text.replace(/[.!?]*$/, "");
+                reason = "Removed ending punctuation";
+              } else {
+                reason = "Shortened by removing ending";
+              }
+            }
           }
         }
       }
@@ -300,31 +314,37 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
         }
       }
       if (reason === "") {
-        // 提供基于语气的通用调整
+        // 提供基于语气的通用调整 - 强制改变
         switch (options.tone) {
           case "professional":
-            if (!/[.!?]$/.test(text)) {
-              optimizedText = text + ".";
+            const capitalized = text.charAt(0).toUpperCase() + text.slice(1);
+            if (!capitalized.endsWith('.') && !capitalized.endsWith('!') && !capitalized.endsWith('?')) {
+              optimizedText = capitalized + ".";
               reason = "Added period for professional tone";
-            } else {
-              optimizedText = text.charAt(0).toUpperCase() + text.slice(1);
+            } else if (capitalized !== text) {
+              optimizedText = capitalized;
               reason = "Capitalized for professional presentation";
+            } else {
+              optimizedText = `Professional: ${text}`;
+              reason = "Added professional prefix";
             }
             break;
           case "casual":
-            optimizedText = text.toLowerCase().replace(/[.!]$/, "");
-            if (optimizedText === text.toLowerCase()) {
-              optimizedText = "hey, " + text.toLowerCase();
-              reason = "Added casual greeting";
-            } else {
+            const lowercase = text.toLowerCase().replace(/[.!?]$/, "");
+            if (lowercase !== text) {
+              optimizedText = lowercase;
               reason = "Made more casual and relaxed";
+            } else {
+              optimizedText = `hey ${text}`;
+              reason = "Added casual greeting";
             }
             break;
           case "creative":
-            optimizedText = `🎨 ${text} ✨`;
+            optimizedText = `✨ ${text} 🎨`;
             reason = "Added creative flourishes";
             break;
           default:
+            optimizedText = `${options.tone}: ${text}`;
             reason = `Adjusted to ${options.tone} tone`;
         }
       }

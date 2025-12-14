@@ -68,13 +68,21 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
     setIsAIOptimizing(true);
     try {
       const options = tone ? { action: action as "tone", tone } : { action: action as "improve" | "shorten" | "expand" };
+      console.log('Calling optimizeText with:', { text: selectedText.content, options });
+
       const result = await optimizeText(selectedText.content, options);
+      console.log('OptimizeText result:', result);
 
       // 确保结果有效
-      if (result && result.suggestion && result.suggestion !== selectedText.content) {
+      if (result && result.suggestion) {
+        console.log('Original text:', selectedText.content);
+        console.log('New suggestion:', result.suggestion);
+        console.log('Are they different?', result.suggestion !== selectedText.content);
+
         editor.updateTextContent(selectedText.id, result.suggestion);
+        console.log('Text updated successfully');
       } else {
-        console.log('No optimization suggestion received or suggestion is same as original');
+        console.log('No valid optimization result received:', result);
       }
     } catch (error) {
       console.error('Failed to optimize text:', error);
