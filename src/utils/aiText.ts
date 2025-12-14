@@ -12,27 +12,72 @@ export interface TextSuggestion {
   reason: string;
 }
 
+// 测试函数 - 直接测试 OpenAI API
+export async function testOpenAIConnection(): Promise<{ success: boolean; error?: string; response?: any }> {
+  console.log('=== Testing OpenAI Connection ===');
+
+  const apiKey = getApiKey();
+  console.log('Testing with API key:', apiKey ? `${apiKey.slice(0, 10)}...` : 'None');
+
+  if (!apiKey) {
+    return { success: false, error: 'No API key found' };
+  }
+
+  try {
+    const testClient = new OpenAI({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true
+    });
+
+    console.log('Making test API call...');
+    const completion = await testClient.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: "Say hello" }],
+      max_tokens: 10
+    });
+
+    console.log('Test API call successful:', completion);
+    return { success: true, response: completion };
+  } catch (error) {
+    console.error('Test API call failed:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
 // 初始化 OpenAI 客户端
 let openai: OpenAI | null = null;
 
+// 安全的环境变量访问
+const getApiKey = () => {
+  try {
+    return import.meta.env?.VITE_OPENAI_API_KEY || null;
+  } catch (error) {
+    console.warn('Failed to access environment variables:', error);
+    return null;
+  }
+};
+
 console.log('=== OpenAI Initialization ===');
-console.log('Environment:', import.meta.env.MODE);
-console.log('API Key exists:', !!import.meta.env.VITE_OPENAI_API_KEY);
-console.log('API Key preview:', import.meta.env.VITE_OPENAI_API_KEY ? `${import.meta.env.VITE_OPENAI_API_KEY.slice(0, 10)}...` : 'Not found');
+console.log('Environment:', import.meta.env?.MODE || 'unknown');
+
+const apiKey = getApiKey();
+console.log('API Key exists:', !!apiKey);
+console.log('API Key preview:', apiKey ? `${apiKey.slice(0, 10)}...` : 'Not found');
 
 try {
-  if (import.meta.env.VITE_OPENAI_API_KEY) {
+  if (apiKey && typeof apiKey === 'string' && apiKey.startsWith('sk-')) {
     console.log('Creating OpenAI client...');
     openai = new OpenAI({
-      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      apiKey: apiKey,
       dangerouslyAllowBrowser: true // 注意：生产环境应该使用后端代理
     });
     console.log('OpenAI client created successfully');
   } else {
-    console.warn('VITE_OPENAI_API_KEY not found in environment variables');
+    console.warn('Valid VITE_OPENAI_API_KEY not found in environment variables');
   }
 } catch (error) {
   console.error('OpenAI client initialization failed:', error);
+  openai = null;
 }
 
 // 预定义的文字优化规则 - 更全面的词汇替换
@@ -199,11 +244,16 @@ export async function optimizeText(text: string, options: TextOptimizationOption
   console.log('=== optimizeText called ===');
   console.log('Text:', text);
   console.log('Options:', options);
+  console.log('Action:', options.action);
+  if ('tone' in options) {
+    console.log('Tone:', options.tone);
+  }
   console.log('OpenAI available:', !!openai);
-  console.log('API Key available:', !!import.meta.env.VITE_OPENAI_API_KEY);
+  const apiKey = getApiKey();
+  console.log('API Key available:', !!apiKey);
 
   // 检查OpenAI可用性，但先尝试API调用
-  if (!openai || !import.meta.env.VITE_OPENAI_API_KEY) {
+  if (!openai || !getApiKey()) {
     console.log('OpenAI not available, using fallback optimization...');
     const result = fallbackOptimizeText(text, options);
     console.log('Fallback result:', result);
@@ -248,7 +298,17 @@ export async function optimizeText(text: string, options: TextOptimizationOption
     });
 
     console.log('OpenAI API Response:', completion);
-    const suggestion = completion.choices[0]?.message?.content?.trim() || text;
+
+    // Safely access the response with proper null checks
+    const firstChoice = completion?.choices?.[0];
+    const messageContent = firstChoice?.message?.content;
+    const suggestion = messageContent?.trim() || text;
+
+    // Additional validation to ensure we have valid content
+    if (!firstChoice || !messageContent) {
+      console.warn('OpenAI API returned invalid response structure');
+      return fallbackOptimizeText(text, options);
+    }
     console.log('Extracted suggestion:', suggestion);
     const actionMap = {
       improve: "Enhanced with AI to be more engaging",
@@ -268,6 +328,17 @@ export async function optimizeText(text: string, options: TextOptimizationOption
     console.error('Error details:', error);
     console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
     console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+
+    // Check for specific OpenAI API errors
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        console.error('API Key issue detected');
+      } else if (error.message.includes('rate limit')) {
+        console.error('Rate limit exceeded');
+      } else if (error.message.includes('network')) {
+        console.error('Network connectivity issue');
+      }
+    }
 
     // 如果API调用失败，回退到预定义规则
     console.log('Falling back to local rules...');
@@ -456,7 +527,7 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
   }
 
   // 如果没有OpenAI客户端，直接使用备用方案
-  if (!openai || !import.meta.env.VITE_OPENAI_API_KEY) {
+  if (!openai || !getApiKey()) {
     console.log('OpenAI not available, using fallback suggestions');
     return getFallbackSuggestions(text);
   }

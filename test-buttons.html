@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试所有6个AI按钮</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { margin: 5px; padding: 10px; }
+        .result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>测试所有6个AI按钮</h1>
+
+    <div>
+        <h3>测试文本: "hello world"</h3>
+        <button onclick="testButton('improve')">Polish</button>
+        <button onclick="testButton('shorten')">Simplify</button>
+        <button onclick="testButton('expand')">Detail</button>
+        <button onclick="testButton('tone', 'professional')">Formal</button>
+        <button onclick="testButton('tone', 'casual')">Casual</button>
+        <button onclick="testButton('tone', 'creative')">Creative</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script type="module">
+        import { optimizeText } from './src/utils/aiText.ts';
+
+        window.testButton = async function(action, tone) {
+            console.log(`\n=== Testing ${action}${tone ? ` (${tone})` : ''} ===`);
+
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = `<strong>${action}${tone ? ` (${tone})` : ''}:</strong> 测试中...`;
+            resultsDiv.appendChild(resultDiv);
+
+            try {
+                const options = tone
+                    ? { action: "tone", tone }
+                    : { action };
+
+                console.log('Testing with options:', options);
+
+                const result = await optimizeText('hello world', options);
+
+                console.log('Result:', result);
+
+                resultDiv.innerHTML = `
+                    <strong>${action}${tone ? ` (${tone})` : ''}:</strong><br>
+                    原文: "${result.original}"<br>
+                    优化后: "${result.suggestion}"<br>
+                    原因: ${result.reason}<br>
+                    ${result.suggestion !== result.original ? '✅ 成功' : '⚠️ 无变化'}
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <strong>${action}${tone ? ` (${tone})` : ''}:</strong><br>
+                    ❌ 错误: ${error.message}
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
