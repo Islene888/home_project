@@ -34,7 +34,7 @@ export class CollaborativeService {
   private userColor: string;
   private listeners: Map<string, () => void> = new Map();
 
-  constructor(roomId: string = "default-room") {
+  constructor(roomId = "default-room") {
     this.roomId = roomId;
 
     // 尝试从sessionStorage获取已有的用户信息

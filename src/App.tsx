@@ -9,6 +9,20 @@ import { UserCursors } from "./components/UserCursors";
 import { DesignEditor, type DesignValue, DesignView } from "./editor";
 import { CollaborativeService } from "./firebase/collaborative";
 
+interface OnlineUser {
+  id: string;
+  name: string;
+  color: string;
+}
+
+interface Cursor {
+  id: string;
+  x: number;
+  y: number;
+  name: string;
+  color: string;
+}
+
 const DEFAULT_EDITOR_VALUE: DesignValue = {
   shapes: {},
   texts: {},
@@ -26,8 +40,8 @@ function App() {
   );
   const canvasRef = useRef<HTMLDivElement>(null);
   const [collaborative] = useState(() => new CollaborativeService());
-  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
-  const [cursors, setCursors] = useState<any[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [cursors, setCursors] = useState<Cursor[]>([]);
 
   // 设置协作功能
   useEffect(() => {

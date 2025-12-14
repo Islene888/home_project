@@ -69,7 +69,7 @@ export const ExportMenu = ({ editor, canvasRef }: ExportMenuProps) => {
       return;
     }
     const filename = getTimestampFilename("design");
-    exportToPNG(canvasRef.current, filename);
+    void exportToPNG(canvasRef.current, filename);
   };
 
   const handleExportPDF = () => {
@@ -78,7 +78,7 @@ export const ExportMenu = ({ editor, canvasRef }: ExportMenuProps) => {
       return;
     }
     const filename = getTimestampFilename("design");
-    exportToPDF(canvasRef.current, filename);
+    void exportToPDF(canvasRef.current, filename);
   };
 
   return (

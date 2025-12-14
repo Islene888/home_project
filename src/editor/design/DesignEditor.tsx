@@ -352,7 +352,7 @@ class DesignEditor {
         ...previousValue.texts,
         [textId]: {
           ...currentText,
-          content: content,
+          content,
         },
       },
     };
@@ -612,7 +612,7 @@ class DesignEditor {
     };
 
     const { nextValue } = this.#updateShapes(previousValue, ids, (shape) => {
-      let updatedShape = { ...shape };
+      const updatedShape = { ...shape };
 
       // Handle stroke memory - 简化逻辑
       if (attributes.stroke !== undefined) {

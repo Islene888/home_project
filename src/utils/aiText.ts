@@ -26,7 +26,7 @@ export async function testOpenAIConnection(): Promise<{
 
   try {
     const testClient = new OpenAI({
-      apiKey: apiKey,
+      apiKey,
       dangerouslyAllowBrowser: true,
     });
 
@@ -38,7 +38,6 @@ export async function testOpenAIConnection(): Promise<{
 
     return { success: true, response: completion };
   } catch (error) {
-    console.error("Test API call failed:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error",
@@ -63,7 +62,7 @@ const apiKey = getApiKey();
 try {
   if (apiKey && typeof apiKey === "string" && apiKey.startsWith("sk-")) {
     openai = new OpenAI({
-      apiKey: apiKey,
+      apiKey,
       dangerouslyAllowBrowser: true, // 注意：生产环境应该使用后端代理
     });
   }
@@ -516,7 +515,6 @@ export async function getTextSuggestions(
 
     return suggestions.slice(0, 3); // 返回前3个建议
   } catch (error) {
-    console.error("Error getting suggestions:", error);
     // 回退到使用预定义规则
     return getFallbackSuggestions(text);
   }

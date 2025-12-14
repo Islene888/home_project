@@ -1,12 +1,17 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
-import type { DesignValue } from "../editor/schema";
+import type {
+  DesignValue,
+  ShapeDef,
+  TextElement,
+  ImageElement,
+} from "../editor/schema";
 
 // JSON导出/导入功能
 export const exportToJSON = (
   designValue: DesignValue,
-  filename: string = "design",
+  filename = "design",
 ) => {
   const dataStr = JSON.stringify(designValue, null, 2);
   const dataBlob = new Blob([dataStr], { type: "application/json" });
@@ -40,8 +45,7 @@ export const importFromJSON = (): Promise<DesignValue | null> => {
           const result = e.target?.result as string;
           const designValue = JSON.parse(result) as DesignValue;
           resolve(designValue);
-        } catch (error) {
-          console.error("Error parsing JSON file:", error);
+        } catch {
           alert("Invalid JSON file format");
           resolve(null);
         }
@@ -118,7 +122,7 @@ export const importImage = (): Promise<{
 export const exportToSVG = (
   _canvasElement: HTMLElement,
   designValue: DesignValue,
-  filename: string = "design",
+  filename = "design",
 ) => {
   const { width, height } = designValue.attributes;
 
@@ -209,11 +213,9 @@ export const exportToSVG = (
 // PNG导出功能
 export const exportToPNG = async (
   canvasElement: HTMLElement,
-  filename: string = "design",
+  filename = "design",
 ) => {
   try {
-    console.log("Starting PNG export...");
-
     // 查找实际的设计画布
     const designCanvas =
       canvasElement.querySelector(".design-canvas") || canvasElement;
@@ -289,10 +291,7 @@ export const exportToPNG = async (
     } else {
       downloadCanvas(canvas, filename);
     }
-
-    console.log("PNG export completed successfully");
   } catch (error) {
-    console.error("Error exporting to PNG:", error);
     alert(
       `Failed to export PNG: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
@@ -320,12 +319,10 @@ const downloadCanvas = (canvas: HTMLCanvasElement, filename: string) => {
 // PDF导出功能
 export const exportToPDF = async (
   _canvasElement: HTMLElement,
-  designValue: any,
-  filename: string = "design",
+  designValue: DesignValue,
+  filename = "design",
 ) => {
   try {
-    console.log("Starting PDF export using SVG method...");
-
     // 直接使用SVG导出方法创建内容
     const svgContent = createSVGContent(designValue);
 
@@ -360,8 +357,6 @@ export const exportToPDF = async (
     ctx.drawImage(img, 0, 0, width, height);
     URL.revokeObjectURL(svgUrl);
 
-    console.log("SVG rendered to canvas successfully");
-
     // 创建PDF
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF({
@@ -372,10 +367,7 @@ export const exportToPDF = async (
 
     pdf.addImage(imgData, "PNG", 0, 0, width, height);
     pdf.save(`${filename}.pdf`);
-
-    console.log("PDF export completed successfully");
   } catch (error) {
-    console.error("Error exporting to PDF:", error);
     alert(
       `PDF导出失败: ${error instanceof Error ? error.message : "未知错误"}`,
     );
@@ -383,14 +375,14 @@ export const exportToPDF = async (
 };
 
 // 创建SVG内容的辅助函数
-function createSVGContent(designValue: any): string {
+function createSVGContent(designValue: DesignValue): string {
   const { width, height } = designValue.attributes;
 
   // 生成形状的SVG内容
   const shapeSVGs = Object.values(designValue.shapes || {})
-    .map((shape: any) => {
+    .map((shape: ShapeDef) => {
       const pathElements = shape.paths
-        .map((path: any) => {
+        .map((path) => {
           const strokeAttr = path.stroke
             ? `stroke="${path.stroke.color}" stroke-width="${path.stroke.weight}"`
             : "";
@@ -417,7 +409,7 @@ function createSVGContent(designValue: any): string {
 
   // 生成文本的SVG内容
   const textSVGs = Object.values(designValue.texts || {})
-    .map((text: any) => {
+    .map((text: TextElement) => {
       return `
       <text
         x="${text.bounds.left}"
@@ -435,7 +427,7 @@ function createSVGContent(designValue: any): string {
 
   // 生成图片的SVG内容
   const imageSVGs = Object.values(designValue.images || {})
-    .map((image: any) => {
+    .map((image: ImageElement) => {
       return `
       <image
         x="${image.bounds.left}"
@@ -460,7 +452,7 @@ function createSVGContent(designValue: any): string {
 }
 
 // 获取当前日期时间作为文件名
-export const getTimestampFilename = (prefix: string = "design") => {
+export const getTimestampFilename = (prefix = "design") => {
   const now = new Date();
   const timestamp = now.toISOString().slice(0, 19).replace(/[T:]/g, "-");
   return `${prefix}-${timestamp}`;

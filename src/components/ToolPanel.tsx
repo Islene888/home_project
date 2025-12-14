@@ -42,7 +42,7 @@ export const ToolPanel = ({
     }
     const filename = getTimestampFilename("design");
     const designValue = editor.state.value;
-    exportToPDF(canvasRef.current, designValue, filename);
+    void exportToPDF(canvasRef.current, designValue, filename);
   };
 
   const handleImageUpload = async () => {
