@@ -31,6 +31,7 @@ export const ToolPanel = ({
   const [isShapePopoverOpen, setIsShapePopoverOpen] = useState(false);
   const { canUndo, canRedo } = useStore(editor.stateStore);
 
+
   const handlePDFExport = () => {
     if (!canvasRef?.current) {
       alert('Canvas not found. Please try again.');
@@ -292,6 +293,7 @@ export const ToolPanel = ({
           </Box>
         </IconButton>
       </Box>
+
     </Flex>
   );
 };

@@ -32,7 +32,7 @@ export const OnlineUsers = ({ users, collaborative }: OnlineUsersProps) => {
             width: "16px",
             height: "16px",
             borderRadius: "4px",
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            background: "#000000",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

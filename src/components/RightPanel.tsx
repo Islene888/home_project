@@ -1,8 +1,10 @@
-import { Box, Flex, Heading, Slider, Switch, Text } from "@radix-ui/themes";
+import { Box, Flex, Heading, Slider, Switch, Text, Button } from "@radix-ui/themes";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { useStore } from "zustand";
 
 import type { DesignEditor, ShapeFill } from "../editor";
+import { optimizeText } from "../utils/aiText";
 import { RightPanelSection } from "./RightPanelSection";
 
 interface RightPanelProps {
@@ -33,10 +35,11 @@ const ControlRow = ({ label, children }: ControlRowProps) => (
 
 export const RightPanel = ({ editor }: RightPanelProps) => {
   const { value, selection } = useStore(editor.stateStore);
+  const [isAIOptimizing, setIsAIOptimizing] = useState(false);
 
-  const selectedShape = selection ? value.shapes[selection.id] : null;
-  const selectedText = selection ? value.texts[selection.id] : null;
-  const selectedImage = selection ? value.images[selection.id] : null;
+  const selectedShape = selection && value?.shapes ? value.shapes[selection.id] : null;
+  const selectedText = selection && value?.texts ? value.texts[selection.id] : null;
+  const selectedImage = selection && value?.images ? value.images[selection.id] : null;
   const selectedElement = selectedShape || selectedText || selectedImage;
 
 
@@ -52,8 +55,24 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
     );
   }
 
+  // 处理异步优化操作
+  const handleOptimizeText = async (action: "improve" | "shorten" | "expand" | "tone", tone?: "professional" | "casual" | "creative") => {
+    if (!selectedText) return;
+    setIsAIOptimizing(true);
+    try {
+      const options = tone ? { action: action as "tone", tone } : { action: action as "improve" | "shorten" | "expand" };
+      const result = await optimizeText(selectedText.content, options);
+      editor.updateTextContent(selectedText.id, result.suggestion);
+    } catch (error) {
+      console.error('Failed to optimize text:', error);
+    } finally {
+      setIsAIOptimizing(false);
+    }
+  };
+
   // Handle text element
   if (selectedText) {
+
     return (
       <Box p="4">
         <Heading size="3" mb="4">
@@ -66,13 +85,9 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                 type="text"
                 value={selectedText.content}
                 onChange={(event) => {
-                  console.log('Text input changed:', event.target.value);
                   editor.updateTextContent(selectedText.id, event.target.value);
                 }}
-                onFocus={() => console.log('Text input focused')}
-                onBlur={() => console.log('Text input blurred')}
                 autoComplete="off"
-                readOnly={false}
                 placeholder="Enter text content..."
                 style={{
                   width: "100%",
@@ -113,6 +128,94 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
               />
             </ControlRow>
           </RightPanelSection>
+
+          {/* AI优化选项 - 简化设计 */}
+          {selectedText.content.trim() && (
+            <RightPanelSection title="AI 文字优化">
+              {isAIOptimizing ? (
+                <Text size="2" color="blue">🤖 正在处理...</Text>
+              ) : (
+                <Flex direction="column" gap="2">
+                  <Flex gap="1" wrap="wrap">
+                    <Button
+                      size="1"
+                      onClick={() => handleOptimizeText("improve")}
+                      style={{
+                        color: "black",
+                        backgroundColor: "transparent",
+                        border: "1px solid black",
+                        borderRadius: "4px"
+                      }}
+                    >
+                      润色
+                    </Button>
+                    <Button
+                      size="1"
+                      onClick={() => handleOptimizeText("shorten")}
+                      style={{
+                        color: "black",
+                        backgroundColor: "transparent",
+                        border: "1px solid black",
+                        borderRadius: "4px"
+                      }}
+                    >
+                      简化
+                    </Button>
+                    <Button
+                      size="1"
+                      onClick={() => handleOptimizeText("expand")}
+                      style={{
+                        color: "black",
+                        backgroundColor: "transparent",
+                        border: "1px solid black",
+                        borderRadius: "4px"
+                      }}
+                    >
+                      详细
+                    </Button>
+                  </Flex>
+                  <Flex gap="1" wrap="wrap">
+                    <Button
+                      size="1"
+                      onClick={() => handleOptimizeText("tone", "professional")}
+                      style={{
+                        color: "black",
+                        backgroundColor: "transparent",
+                        border: "1px solid black",
+                        borderRadius: "4px"
+                      }}
+                    >
+                      正式
+                    </Button>
+                    <Button
+                      size="1"
+                      onClick={() => handleOptimizeText("tone", "casual")}
+                      style={{
+                        color: "black",
+                        backgroundColor: "transparent",
+                        border: "1px solid black",
+                        borderRadius: "4px"
+                      }}
+                    >
+                      随意
+                    </Button>
+                    <Button
+                      size="1"
+                      onClick={() => handleOptimizeText("tone", "creative")}
+                      style={{
+                        color: "black",
+                        backgroundColor: "transparent",
+                        border: "1px solid black",
+                        borderRadius: "4px"
+                      }}
+                    >
+                      创意
+                    </Button>
+                  </Flex>
+                </Flex>
+              )}
+            </RightPanelSection>
+          )}
         </Flex>
       </Box>
     );
