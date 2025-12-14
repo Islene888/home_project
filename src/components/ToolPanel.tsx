@@ -1,11 +1,15 @@
 import { Box, Flex, IconButton, Popover } from "@radix-ui/themes";
-import { Redo, Shapes, Type, Undo, Image, Download } from "lucide-react";
+import { Download, Image, Redo, Shapes, Type, Undo } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "zustand";
 
 import type { DesignEditor, ShapePath, ShapeViewBox } from "../editor";
+import {
+  exportToPDF,
+  getTimestampFilename,
+  importImage,
+} from "../utils/exportUtils";
 import { ShapePanel } from "./ShapePanel";
-import { exportToPDF, getTimestampFilename, importImage } from "../utils/exportUtils";
 
 export type ToolId = "shape" | "text" | null;
 
@@ -31,13 +35,12 @@ export const ToolPanel = ({
   const [isShapePopoverOpen, setIsShapePopoverOpen] = useState(false);
   const { canUndo, canRedo } = useStore(editor.stateStore);
 
-
   const handlePDFExport = () => {
     if (!canvasRef?.current) {
-      alert('Canvas not found. Please try again.');
+      alert("Canvas not found. Please try again.");
       return;
     }
-    const filename = getTimestampFilename('design');
+    const filename = getTimestampFilename("design");
     const designValue = editor.state.value;
     exportToPDF(canvasRef.current, designValue, filename);
   };
@@ -48,7 +51,11 @@ export const ToolPanel = ({
       // 缩放图片到合适大小 (最大400x300)
       const maxWidth = 400;
       const maxHeight = 300;
-      const scale = Math.min(maxWidth / imageData.width, maxHeight / imageData.height, 1);
+      const scale = Math.min(
+        maxWidth / imageData.width,
+        maxHeight / imageData.height,
+        1,
+      );
 
       const scaledWidth = Math.round(imageData.width * scale);
       const scaledHeight = Math.round(imageData.height * scale);
@@ -63,7 +70,7 @@ export const ToolPanel = ({
 
   const tools: Tool[] = [
     { id: "shape", icon: Shapes, label: "Shapes" },
-    { id: "text", icon: Type, label: "Text" }
+    { id: "text", icon: Type, label: "Text" },
   ];
 
   const handleShapeSelect = (shapeDef: {
@@ -145,7 +152,13 @@ export const ToolPanel = ({
       </Box>
 
       {/* Separator */}
-      <Box style={{ height: "1px", background: "var(--gray-6)", margin: "4px 8px" }} />
+      <Box
+        style={{
+          height: "1px",
+          background: "var(--gray-6)",
+          margin: "4px 8px",
+        }}
+      />
 
       {tools.map((tool) => {
         const Icon = tool.icon;
@@ -293,7 +306,6 @@ export const ToolPanel = ({
           </Box>
         </IconButton>
       </Box>
-
     </Flex>
   );
 };

@@ -1,15 +1,15 @@
 import { Button, Flex } from "@radix-ui/themes";
-import { Download, FileText, Image, FileImage, Upload } from "lucide-react";
+import { Download, FileImage, FileText, Image, Upload } from "lucide-react";
 
 import type { DesignEditor } from "../editor";
 import {
   exportToJSON,
+  exportToPDF,
+  exportToPNG,
+  exportToSVG,
+  getTimestampFilename,
   importFromJSON,
   importImage,
-  exportToSVG,
-  exportToPNG,
-  exportToPDF,
-  getTimestampFilename,
 } from "../utils/exportUtils";
 
 interface ExportMenuProps {
@@ -19,7 +19,7 @@ interface ExportMenuProps {
 
 export const ExportMenu = ({ editor, canvasRef }: ExportMenuProps) => {
   const handleExportJSON = () => {
-    const filename = getTimestampFilename('design');
+    const filename = getTimestampFilename("design");
     exportToJSON(editor.state.value, filename);
   };
 
@@ -36,7 +36,11 @@ export const ExportMenu = ({ editor, canvasRef }: ExportMenuProps) => {
       // 缩放图片到合适大小 (最大400x300)
       const maxWidth = 400;
       const maxHeight = 300;
-      const scale = Math.min(maxWidth / imageData.width, maxHeight / imageData.height, 1);
+      const scale = Math.min(
+        maxWidth / imageData.width,
+        maxHeight / imageData.height,
+        1,
+      );
 
       const scaledWidth = Math.round(imageData.width * scale);
       const scaledHeight = Math.round(imageData.height * scale);
@@ -51,25 +55,29 @@ export const ExportMenu = ({ editor, canvasRef }: ExportMenuProps) => {
   };
 
   const handleExportSVG = () => {
-    const filename = getTimestampFilename('design');
-    exportToSVG(canvasRef?.current || document.createElement('div'), editor.state.value, filename);
+    const filename = getTimestampFilename("design");
+    exportToSVG(
+      canvasRef?.current || document.createElement("div"),
+      editor.state.value,
+      filename,
+    );
   };
 
   const handleExportPNG = () => {
     if (!canvasRef?.current) {
-      alert('Canvas not found. Please try again.');
+      alert("Canvas not found. Please try again.");
       return;
     }
-    const filename = getTimestampFilename('design');
+    const filename = getTimestampFilename("design");
     exportToPNG(canvasRef.current, filename);
   };
 
   const handleExportPDF = () => {
     if (!canvasRef?.current) {
-      alert('Canvas not found. Please try again.');
+      alert("Canvas not found. Please try again.");
       return;
     }
-    const filename = getTimestampFilename('design');
+    const filename = getTimestampFilename("design");
     exportToPDF(canvasRef.current, filename);
   };
 

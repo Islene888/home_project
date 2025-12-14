@@ -1,4 +1,12 @@
-import { Box, Flex, Heading, Slider, Switch, Text, Button } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Slider,
+  Switch,
+  Text,
+} from "@radix-ui/themes";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useStore } from "zustand";
@@ -37,12 +45,13 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
   const { value, selection } = useStore(editor.stateStore);
   const [isAIOptimizing, setIsAIOptimizing] = useState(false);
 
-  const selectedShape = selection && value?.shapes ? value.shapes[selection.id] : null;
-  const selectedText = selection && value?.texts ? value.texts[selection.id] : null;
-  const selectedImage = selection && value?.images ? value.images[selection.id] : null;
+  const selectedShape =
+    selection && value?.shapes ? value.shapes[selection.id] : null;
+  const selectedText =
+    selection && value?.texts ? value.texts[selection.id] : null;
+  const selectedImage =
+    selection && value?.images ? value.images[selection.id] : null;
   const selectedElement = selectedShape || selectedText || selectedImage;
-
-
 
   if (!selectedElement) {
     return (
@@ -56,7 +65,10 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
   }
 
   // 处理异步优化操作
-  const handleOptimizeText = async (action: "improve" | "shorten" | "expand" | "tone", tone?: "professional" | "casual" | "creative") => {
+  const handleOptimizeText = async (
+    action: "improve" | "shorten" | "expand" | "tone",
+    tone?: "professional" | "casual" | "creative",
+  ) => {
     if (!selectedText) {
       return;
     }
@@ -89,7 +101,6 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
 
   // Handle text element
   if (selectedText) {
-
     return (
       <Box p="4">
         <Heading size="3" mb="4">
@@ -124,7 +135,9 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                 max={72}
                 value={[selectedText.fontSize]}
                 onValueChange={(value) => {
-                  editor.updateTextStyle(selectedText.id, { fontSize: value[0] ?? 16 });
+                  editor.updateTextStyle(selectedText.id, {
+                    fontSize: value[0] ?? 16,
+                  });
                 }}
               />
             </ControlRow>
@@ -133,7 +146,9 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                 type="color"
                 value={selectedText.color}
                 onChange={(event) => {
-                  editor.updateTextStyle(selectedText.id, { color: event.target.value });
+                  editor.updateTextStyle(selectedText.id, {
+                    color: event.target.value,
+                  });
                 }}
                 style={{
                   width: "100%",
@@ -150,7 +165,9 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
           {selectedText.content.trim() && (
             <RightPanelSection title="AI Text Optimization">
               {isAIOptimizing ? (
-                <Text size="2" color="blue">🤖 Processing...</Text>
+                <Text size="2" color="blue">
+                  🤖 Processing...
+                </Text>
               ) : (
                 <Flex direction="column" gap="2">
                   <Flex gap="1" wrap="wrap">
@@ -161,7 +178,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         color: "black",
                         backgroundColor: "transparent",
                         border: "1px solid black",
-                        borderRadius: "4px"
+                        borderRadius: "4px",
                       }}
                     >
                       Polish
@@ -173,7 +190,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         color: "black",
                         backgroundColor: "transparent",
                         border: "1px solid black",
-                        borderRadius: "4px"
+                        borderRadius: "4px",
                       }}
                     >
                       Simplify
@@ -185,7 +202,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         color: "black",
                         backgroundColor: "transparent",
                         border: "1px solid black",
-                        borderRadius: "4px"
+                        borderRadius: "4px",
                       }}
                     >
                       Detail
@@ -199,7 +216,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         color: "black",
                         backgroundColor: "transparent",
                         border: "1px solid black",
-                        borderRadius: "4px"
+                        borderRadius: "4px",
                       }}
                     >
                       Formal
@@ -211,7 +228,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         color: "black",
                         backgroundColor: "transparent",
                         border: "1px solid black",
-                        borderRadius: "4px"
+                        borderRadius: "4px",
                       }}
                     >
                       Casual
@@ -223,7 +240,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         color: "black",
                         backgroundColor: "transparent",
                         border: "1px solid black",
-                        borderRadius: "4px"
+                        borderRadius: "4px",
                       }}
                     >
                       Creative
@@ -248,10 +265,14 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
         <Flex direction="column" gap="3">
           <RightPanelSection title="Size">
             <ControlRow label="Width">
-              <Text size="2" color="gray">{selectedImage.bounds.width}px</Text>
+              <Text size="2" color="gray">
+                {selectedImage.bounds.width}px
+              </Text>
             </ControlRow>
             <ControlRow label="Height">
-              <Text size="2" color="gray">{selectedImage.bounds.height}px</Text>
+              <Text size="2" color="gray">
+                {selectedImage.bounds.height}px
+              </Text>
             </ControlRow>
           </RightPanelSection>
           <RightPanelSection title="Opacity">
@@ -263,7 +284,10 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                     max={100}
                     value={[(selectedImage.opacity || 1) * 100]}
                     onValueChange={(value) => {
-                      editor.updateImageOpacity(selectedImage.id, (value[0] ?? 100) / 100);
+                      editor.updateImageOpacity(
+                        selectedImage.id,
+                        (value[0] ?? 100) / 100,
+                      );
                     }}
                   />
                 </Box>
@@ -278,9 +302,12 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
   const path = selectedShape?.paths[0];
   const hasStroke = !!path?.stroke;
   const hasFill = !!path?.fill;
-  const strokeColor = path?.stroke?.color || selectedShape?.rememberedStroke?.color || "#000000";
-  const strokeWeight = path?.stroke?.weight || selectedShape?.rememberedStroke?.weight || 2;
-  const fillColor = path?.fill?.color || selectedShape?.rememberedFill?.color || "#000000";
+  const strokeColor =
+    path?.stroke?.color || selectedShape?.rememberedStroke?.color || "#000000";
+  const strokeWeight =
+    path?.stroke?.weight || selectedShape?.rememberedStroke?.weight || 2;
+  const fillColor =
+    path?.fill?.color || selectedShape?.rememberedFill?.color || "#000000";
 
   const updateShapeProperties = (updates: {
     stroke?: { color?: string; weight?: number } | null;
@@ -307,7 +334,10 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
               onCheckedChange={(isChecked) => {
                 updateShapeProperties({
                   fill: isChecked
-                    ? { color: selectedShape?.rememberedFill?.color || fillColor }
+                    ? {
+                        color:
+                          selectedShape?.rememberedFill?.color || fillColor,
+                      }
                     : null,
                 });
               }}
@@ -343,8 +373,11 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                 updateShapeProperties({
                   stroke: isChecked
                     ? {
-                        color: selectedShape?.rememberedStroke?.color || strokeColor,
-                        weight: selectedShape?.rememberedStroke?.weight || strokeWeight,
+                        color:
+                          selectedShape?.rememberedStroke?.color || strokeColor,
+                        weight:
+                          selectedShape?.rememberedStroke?.weight ||
+                          strokeWeight,
                       }
                     : null,
                 });

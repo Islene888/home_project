@@ -1,5 +1,5 @@
 // AI文字优化工具 - 使用 OpenAI API
-import OpenAI from 'openai';
+import OpenAI from "openai";
 
 interface TextOptimizationOptions {
   action: "improve" | "shorten" | "expand" | "tone";
@@ -13,29 +13,36 @@ export interface TextSuggestion {
 }
 
 // 测试函数 - 直接测试 OpenAI API
-export async function testOpenAIConnection(): Promise<{ success: boolean; error?: string; response?: any }> {
+export async function testOpenAIConnection(): Promise<{
+  success: boolean;
+  error?: string;
+  response?: any;
+}> {
   const apiKey = getApiKey();
 
   if (!apiKey) {
-    return { success: false, error: 'No API key found' };
+    return { success: false, error: "No API key found" };
   }
 
   try {
     const testClient = new OpenAI({
       apiKey: apiKey,
-      dangerouslyAllowBrowser: true
+      dangerouslyAllowBrowser: true,
     });
 
     const completion = await testClient.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: "Say hello" }],
-      max_tokens: 10
+      max_tokens: 10,
     });
 
     return { success: true, response: completion };
   } catch (error) {
-    console.error('Test API call failed:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    console.error("Test API call failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
@@ -54,10 +61,10 @@ const getApiKey = () => {
 const apiKey = getApiKey();
 
 try {
-  if (apiKey && typeof apiKey === 'string' && apiKey.startsWith('sk-')) {
+  if (apiKey && typeof apiKey === "string" && apiKey.startsWith("sk-")) {
     openai = new OpenAI({
       apiKey: apiKey,
-      dangerouslyAllowBrowser: true // 注意：生产环境应该使用后端代理
+      dangerouslyAllowBrowser: true, // 注意：生产环境应该使用后端代理
     });
   }
 } catch (error) {
@@ -69,114 +76,114 @@ const improvementRules = [
   {
     pattern: /\b(ok|okay)\b/gi,
     replacement: "excellent",
-    reason: "Using stronger positive language"
+    reason: "Using stronger positive language",
   },
   {
     pattern: /\b(good)\b/gi,
     replacement: "outstanding",
-    reason: "Enhanced descriptive language"
+    reason: "Enhanced descriptive language",
   },
   {
     pattern: /\b(nice)\b/gi,
     replacement: "fantastic",
-    reason: "More enthusiastic expression"
+    reason: "More enthusiastic expression",
   },
   {
     pattern: /\b(great)\b/gi,
     replacement: "exceptional",
-    reason: "More impactful language"
+    reason: "More impactful language",
   },
   {
     pattern: /\b(cool)\b/gi,
     replacement: "impressive",
-    reason: "More professional tone"
+    reason: "More professional tone",
   },
   {
     pattern: /\b(awesome)\b/gi,
     replacement: "remarkable",
-    reason: "Elevated vocabulary"
+    reason: "Elevated vocabulary",
   },
   {
     pattern: /\b(big)\b/gi,
     replacement: "substantial",
-    reason: "More precise terminology"
+    reason: "More precise terminology",
   },
   {
     pattern: /\b(small)\b/gi,
     replacement: "compact",
-    reason: "More descriptive language"
+    reason: "More descriptive language",
   },
   {
     pattern: /\b(fast|quick)\b/gi,
     replacement: "efficient",
-    reason: "Professional terminology"
+    reason: "Professional terminology",
   },
   {
     pattern: /\b(easy)\b/gi,
     replacement: "straightforward",
-    reason: "More sophisticated expression"
+    reason: "More sophisticated expression",
   },
   {
     pattern: /\b(hard|difficult)\b/gi,
     replacement: "challenging",
-    reason: "More positive framing"
+    reason: "More positive framing",
   },
   {
     pattern: /\b(text|content)\b/gi,
     replacement: "compelling content",
-    reason: "More engaging description"
+    reason: "More engaging description",
   },
   {
     pattern: /\b(hello|hi)\b/gi,
     replacement: "greetings",
-    reason: "More polished greeting"
+    reason: "More polished greeting",
   },
   {
     pattern: /\b(make|create)\b/gi,
     replacement: "craft",
-    reason: "More elegant verb choice"
+    reason: "More elegant verb choice",
   },
   {
     pattern: /\b(help)\b/gi,
     replacement: "assist",
-    reason: "More formal language"
-  }
+    reason: "More formal language",
+  },
 ];
 
 const shortenRules = [
   {
     pattern: /\b(in order to)\b/gi,
     replacement: "to",
-    reason: "Simplified phrasing"
+    reason: "Simplified phrasing",
   },
   {
     pattern: /\b(at this point in time)\b/gi,
     replacement: "now",
-    reason: "Concise expression"
+    reason: "Concise expression",
   },
   {
     pattern: /\b(due to the fact that)\b/gi,
     replacement: "because",
-    reason: "Direct language"
-  }
+    reason: "Direct language",
+  },
 ];
 
 const expandRules = [
   {
     pattern: /\b(fast)\b/gi,
     replacement: "remarkably fast and efficient",
-    reason: "Added descriptive detail"
+    reason: "Added descriptive detail",
   },
   {
     pattern: /\b(good)\b/gi,
     replacement: "exceptionally good and well-designed",
-    reason: "Enhanced description"
+    reason: "Enhanced description",
   },
   {
     pattern: /\b(nice)\b/gi,
     replacement: "beautifully crafted and aesthetically pleasing",
-    reason: "Detailed description"
-  }
+    reason: "Detailed description",
+  },
 ];
 
 const toneRules = {
@@ -184,47 +191,50 @@ const toneRules = {
     {
       pattern: /\b(hey|hi)\b/gi,
       replacement: "Hello",
-      reason: "Professional greeting"
+      reason: "Professional greeting",
     },
     {
       pattern: /\b(gonna)\b/gi,
       replacement: "going to",
-      reason: "Formal language"
+      reason: "Formal language",
     },
     {
       pattern: /\b(wanna)\b/gi,
       replacement: "want to",
-      reason: "Professional tone"
-    }
+      reason: "Professional tone",
+    },
   ],
   casual: [
     {
       pattern: /\b(Hello)\b/gi,
       replacement: "Hey",
-      reason: "Casual greeting"
+      reason: "Casual greeting",
     },
     {
       pattern: /\b(going to)\b/gi,
       replacement: "gonna",
-      reason: "Relaxed tone"
-    }
+      reason: "Relaxed tone",
+    },
   ],
   creative: [
     {
       pattern: /\b(good)\b/gi,
       replacement: "magnificent",
-      reason: "Creative expression"
+      reason: "Creative expression",
     },
     {
       pattern: /\b(nice)\b/gi,
       replacement: "delightful",
-      reason: "Artistic language"
-    }
-  ]
+      reason: "Artistic language",
+    },
+  ],
 };
 
 // 使用OpenAI API进行文字优化
-export async function optimizeText(text: string, options: TextOptimizationOptions): Promise<TextSuggestion> {
+export async function optimizeText(
+  text: string,
+  options: TextOptimizationOptions,
+): Promise<TextSuggestion> {
   // 检查OpenAI可用性，但先尝试API调用
   if (!openai || !getApiKey()) {
     return fallbackOptimizeText(text, options);
@@ -247,7 +257,7 @@ export async function optimizeText(text: string, options: TextOptimizationOption
         const toneMap = {
           professional: "professional and formal",
           casual: "casual and friendly",
-          creative: "creative and artistic"
+          creative: "creative and artistic",
         };
         const toneStyle = toneMap[options.tone || "professional"];
         prompt = `Rewrite the following text in a ${toneStyle} tone. Only return the rewritten text, nothing else: "${text}"`;
@@ -256,9 +266,7 @@ export async function optimizeText(text: string, options: TextOptimizationOption
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [
-        { role: "user", content: prompt }
-      ],
+      messages: [{ role: "user", content: prompt }],
       max_tokens: 150,
       temperature: 0.7,
     });
@@ -277,15 +285,14 @@ export async function optimizeText(text: string, options: TextOptimizationOption
       improve: "Enhanced with AI to be more engaging",
       shorten: "Condensed for clarity and brevity",
       expand: "Expanded with additional detail",
-      tone: `Adjusted to ${options.tone || "professional"} tone`
+      tone: `Adjusted to ${options.tone || "professional"} tone`,
     };
 
     return {
       original: text,
-      suggestion: suggestion.replace(/^["']|["']$/g, ''), // 移除可能的引号
-      reason: actionMap[options.action]
+      suggestion: suggestion.replace(/^["']|["']$/g, ""), // 移除可能的引号
+      reason: actionMap[options.action],
     };
-
   } catch (error) {
     // 如果API调用失败，回退到预定义规则
     return fallbackOptimizeText(text, options);
@@ -293,8 +300,10 @@ export async function optimizeText(text: string, options: TextOptimizationOption
 }
 
 // 备用优化函数（使用预定义规则）
-function fallbackOptimizeText(text: string, options: TextOptimizationOptions): TextSuggestion {
-
+function fallbackOptimizeText(
+  text: string,
+  options: TextOptimizationOptions,
+): TextSuggestion {
   let optimizedText = text;
   let reason = "";
 
@@ -318,12 +327,16 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
           reason = "Capitalized first letter for better presentation";
         } else {
           // 2. 添加句号使其更正式
-          if (!text.endsWith('.') && !text.endsWith('!') && !text.endsWith('?')) {
-            optimizedText = text + '.';
+          if (
+            !text.endsWith(".") &&
+            !text.endsWith("!") &&
+            !text.endsWith("?")
+          ) {
+            optimizedText = text + ".";
             reason = "Added period for polished presentation";
           } else {
             // 3. 移除多余空格并优化格式
-            const cleaned = text.replace(/\s+/g, ' ').trim();
+            const cleaned = text.replace(/\s+/g, " ").trim();
             if (cleaned !== text) {
               optimizedText = cleaned;
               reason = "Cleaned up spacing for better formatting";
@@ -347,7 +360,10 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
       }
       if (reason === "") {
         // 移除限定词
-        let shortened = text.replace(/\b(very|really|quite|rather|extremely|incredibly)\s+/gi, "");
+        let shortened = text.replace(
+          /\b(very|really|quite|rather|extremely|incredibly)\s+/gi,
+          "",
+        );
         if (shortened !== text && shortened.trim()) {
           optimizedText = shortened;
           reason = "Removed unnecessary qualifying words";
@@ -406,7 +422,11 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
         switch (options.tone) {
           case "professional":
             const capitalized = text.charAt(0).toUpperCase() + text.slice(1);
-            if (!capitalized.endsWith('.') && !capitalized.endsWith('!') && !capitalized.endsWith('?')) {
+            if (
+              !capitalized.endsWith(".") &&
+              !capitalized.endsWith("!") &&
+              !capitalized.endsWith("?")
+            ) {
               optimizedText = capitalized + ".";
               reason = "Added period for professional tone";
             } else if (capitalized !== text) {
@@ -442,24 +462,24 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
   const result = {
     original: text,
     suggestion: optimizedText,
-    reason: `${reason} (Offline mode)`
+    reason: `${reason} (Offline mode)`,
   };
-
 
   return result;
 }
 
 // 快速建议 - 提供多个选项
-export async function getTextSuggestions(text: string): Promise<TextSuggestion[]> {
-
+export async function getTextSuggestions(
+  text: string,
+): Promise<TextSuggestion[]> {
   // 如果文本太短或为空，先提供一些备用建议
   if (!text || text.trim().length < 2) {
     return [
       {
         original: text,
         suggestion: "Add meaningful content here",
-        reason: "Text is too short for AI analysis"
-      }
+        reason: "Text is too short for AI analysis",
+      },
     ];
   }
 
@@ -474,17 +494,17 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
   const options = [
     { action: "improve" as const },
     { action: "shorten" as const },
-    { action: "expand" as const }
+    { action: "expand" as const },
   ];
 
   try {
     // 并行调用API获取建议
     const results = await Promise.all(
-      options.map(option => optimizeText(text, option))
+      options.map((option) => optimizeText(text, option)),
     );
 
     for (const result of results) {
-      if (result.suggestion !== text && result.suggestion.trim() !== '') {
+      if (result.suggestion !== text && result.suggestion.trim() !== "") {
         suggestions.push(result);
       }
     }
@@ -496,7 +516,7 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
 
     return suggestions.slice(0, 3); // 返回前3个建议
   } catch (error) {
-    console.error('Error getting suggestions:', error);
+    console.error("Error getting suggestions:", error);
     // 回退到使用预定义规则
     return getFallbackSuggestions(text);
   }
@@ -509,7 +529,7 @@ function getFallbackSuggestions(text: string): TextSuggestion[] {
   const fallbackOptions = [
     { action: "improve" as const },
     { action: "shorten" as const },
-    { action: "expand" as const }
+    { action: "expand" as const },
   ];
 
   for (const option of fallbackOptions) {
@@ -521,24 +541,23 @@ function getFallbackSuggestions(text: string): TextSuggestion[] {
 
   // 如果还是没有建议，提供一些强制性的通用建议
   if (suggestions.length === 0) {
-
     // 提供多个不同的建议选项
     const defaultSuggestions = [
       {
         original: text,
         suggestion: `✨ ${text}`,
-        reason: "Added sparkle emoji for emphasis (Offline mode)"
+        reason: "Added sparkle emoji for emphasis (Offline mode)",
       },
       {
         original: text,
         suggestion: text.charAt(0).toUpperCase() + text.slice(1) + ".",
-        reason: "Capitalized and added period (Offline mode)"
+        reason: "Capitalized and added period (Offline mode)",
       },
       {
         original: text,
         suggestion: `"${text}"`,
-        reason: "Added quotation marks (Offline mode)"
-      }
+        reason: "Added quotation marks (Offline mode)",
+      },
     ];
 
     // 只添加与原文不同的建议
@@ -554,7 +573,7 @@ function getFallbackSuggestions(text: string): TextSuggestion[] {
       suggestions.push({
         original: text,
         suggestion: `Enhanced: ${text}`,
-        reason: "Added prefix for improvement (Offline mode)"
+        reason: "Added prefix for improvement (Offline mode)",
       });
     }
   }

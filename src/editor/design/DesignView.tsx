@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import { useStore } from "zustand";
 
+import ImageNode from "../image/ImageNode";
 // import { isPointHitLayout } from "../math/hitTests";
-import { ShapeDef, Element } from "../schema";
+import { Element, ShapeDef } from "../schema";
 import { type Selection, SelectionArea } from "../selection";
 import TextSelectionArea from "../selection/TextSelectionArea";
-import ImageNode from "../image/ImageNode";
 import ShapeNode from "../shape/ShapeNode";
 import TextNode from "../text/TextNode";
 import useDragGesture from "../utils/useDragGesture";
@@ -21,9 +21,12 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
   const { value, selection } = useStore(editor.stateStore);
   const isDoubleClickingRef = useRef(false);
   const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const selectedShape = selection && value?.shapes ? value.shapes[selection.id] : null;
-  const selectedText = selection && value?.texts ? value.texts[selection.id] : null;
-  const selectedImage = selection && value?.images ? value.images[selection.id] : null;
+  const selectedShape =
+    selection && value?.shapes ? value.shapes[selection.id] : null;
+  const selectedText =
+    selection && value?.texts ? value.texts[selection.id] : null;
+  const selectedImage =
+    selection && value?.images ? value.images[selection.id] : null;
   const selectedElement = selectedShape || selectedText || selectedImage;
 
   const { onDragStart, dragProps } = useDragGesture<Element>({
@@ -43,10 +46,18 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
         });
       } else if (snapshot.type === "text") {
         // For text, we need to update the text position
-        editor.updateTextPosition(snapshot.id, updatedElement.bounds.left, updatedElement.bounds.top);
+        editor.updateTextPosition(
+          snapshot.id,
+          updatedElement.bounds.left,
+          updatedElement.bounds.top,
+        );
       } else if (snapshot.type === "image") {
         // For images, we need to update the image position
-        editor.updateImagePosition(snapshot.id, updatedElement.bounds.left, updatedElement.bounds.top);
+        editor.updateImagePosition(
+          snapshot.id,
+          updatedElement.bounds.left,
+          updatedElement.bounds.top,
+        );
       }
     },
   });
@@ -108,7 +119,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
           const y = event.clientY - relativeRect.top;
 
           // Handle text tool
-          if (currentTool === 'text') {
+          if (currentTool === "text") {
             editor.createText({
               left: x,
               top: y,
@@ -116,7 +127,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
               fontSize: 16,
               color: "#000000",
               fontWeight: "normal",
-              fontFamily: "Arial, sans-serif"
+              fontFamily: "Arial, sans-serif",
             });
             onToolChange?.(null);
             return;
@@ -167,7 +178,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
             }}
             onPointerDown={(event) => {
               const target = event.target as HTMLElement;
-              if (target.tagName === 'INPUT' || isDoubleClickingRef.current) {
+              if (target.tagName === "INPUT" || isDoubleClickingRef.current) {
                 return; // Don't interfere with text editing or double clicking
               }
 
@@ -187,7 +198,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
                 clientY: event.clientY,
                 currentTarget: event.currentTarget,
                 pointerId: event.pointerId,
-                buttons: event.buttons
+                buttons: event.buttons,
               };
 
               // Delay drag start to allow double click detection
@@ -199,7 +210,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
                     clientY: eventData.clientY,
                     currentTarget: eventData.currentTarget,
                     pointerId: eventData.pointerId,
-                    buttons: eventData.buttons
+                    buttons: eventData.buttons,
                   };
                   onDragStart(syntheticEvent as any, text);
                 }
@@ -224,7 +235,9 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
           >
             <TextNode
               text={text}
-              onContentChange={(id, content) => editor.updateTextContent(id, content)}
+              onContentChange={(id, content) =>
+                editor.updateTextContent(id, content)
+              }
             />
           </div>
         ))}
@@ -277,7 +290,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
             ...selectedElement,
             type: "shape",
             paths: [],
-            viewBox: { minX: 0, minY: 0, width: 100, height: 100 }
+            viewBox: { minX: 0, minY: 0, width: 100, height: 100 },
           }}
           onSelectionChange={(newSelection) =>
             editor.setSelection(newSelection)

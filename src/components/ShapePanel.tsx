@@ -34,7 +34,11 @@ const shapes: {
   },
   {
     label: "Star",
-    paths: [{ d: "M32,4 L36,20 L52,20 L40,30 L44,46 L32,36 L20,46 L24,30 L12,20 L28,20 Z" }],
+    paths: [
+      {
+        d: "M32,4 L36,20 L52,20 L40,30 L44,46 L32,36 L20,46 L24,30 L12,20 L28,20 Z",
+      },
+    ],
     viewBox: { minX: 0, minY: 0, width: 64, height: 50 },
   },
   {

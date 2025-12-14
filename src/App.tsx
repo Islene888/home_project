@@ -2,12 +2,12 @@ import { Box, Flex } from "@radix-ui/themes";
 import { useEffect, useRef, useState } from "react";
 
 import { EditorContextMenu } from "./components/EditorContextMenu";
+import { OnlineUsers } from "./components/OnlineUsers";
 import { RightPanel } from "./components/RightPanel";
 import { type ToolId, ToolPanel } from "./components/ToolPanel";
+import { UserCursors } from "./components/UserCursors";
 import { DesignEditor, type DesignValue, DesignView } from "./editor";
 import { CollaborativeService } from "./firebase/collaborative";
-import { OnlineUsers } from "./components/OnlineUsers";
-import { UserCursors } from "./components/UserCursors";
 
 const DEFAULT_EDITOR_VALUE: DesignValue = {
   shapes: {},
@@ -36,7 +36,7 @@ function App() {
       editor.state.value,
       (newValue) => {
         editor.updateDesignData(newValue);
-      }
+      },
     );
 
     // 监听编辑器状态变化并同步
@@ -70,17 +70,17 @@ function App() {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for undo/redo keyboard shortcuts
       if (event.ctrlKey || event.metaKey) {
-        if (event.key === 'z' && !event.shiftKey) {
+        if (event.key === "z" && !event.shiftKey) {
           event.preventDefault();
           editor.undo();
-        } else if ((event.key === 'z' && event.shiftKey) || event.key === 'y') {
+        } else if ((event.key === "z" && event.shiftKey) || event.key === "y") {
           event.preventDefault();
           editor.redo();
         }
       }
 
       // Delete key for element deletion
-      if (event.key === 'Delete' || event.key === 'Backspace') {
+      if (event.key === "Delete" || event.key === "Backspace") {
         const { selection, value } = editor.state;
         if (selection) {
           event.preventDefault();
@@ -99,9 +99,9 @@ function App() {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [editor, currentToolId]);
 
@@ -137,9 +137,7 @@ function App() {
           }}
           onMouseMove={handleMouseMove}
         >
-          <EditorContextMenu
-            editor={editor}
-          >
+          <EditorContextMenu editor={editor}>
             <DesignView
               editor={editor}
               currentTool={currentToolId || undefined}
@@ -150,7 +148,6 @@ function App() {
           {/* 用户光标 */}
           <UserCursors cursors={cursors} />
         </Box>
-
       </Flex>
 
       <Box
@@ -162,7 +159,6 @@ function App() {
       >
         <RightPanel editor={editor} />
       </Box>
-
     </Flex>
   );
 }

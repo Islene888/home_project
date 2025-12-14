@@ -82,7 +82,7 @@ export abstract class BaseCommand implements Command {
   constructor(
     previousValue: DesignValue,
     nextValue: DesignValue,
-    public description: string
+    public description: string,
   ) {
     this.previousValue = structuredClone(previousValue);
     this.nextValue = structuredClone(nextValue);
@@ -104,19 +104,30 @@ export class CreateShapeCommand extends BaseCommand {
 }
 
 export class DeleteShapeCommand extends BaseCommand {
-  constructor(previousValue: DesignValue, nextValue: DesignValue, shapeIds: ID[]) {
-    const description = shapeIds.length === 1
-      ? `Delete shape ${shapeIds[0]}`
-      : `Delete ${shapeIds.length} shapes`;
+  constructor(
+    previousValue: DesignValue,
+    nextValue: DesignValue,
+    shapeIds: ID[],
+  ) {
+    const description =
+      shapeIds.length === 1
+        ? `Delete shape ${shapeIds[0]}`
+        : `Delete ${shapeIds.length} shapes`;
     super(previousValue, nextValue, description);
   }
 }
 
 export class UpdateShapeCommand extends BaseCommand {
-  constructor(previousValue: DesignValue, nextValue: DesignValue, shapeIds: ID[], operation: string) {
-    const description = shapeIds.length === 1
-      ? `${operation} shape ${shapeIds[0]}`
-      : `${operation} ${shapeIds.length} shapes`;
+  constructor(
+    previousValue: DesignValue,
+    nextValue: DesignValue,
+    shapeIds: ID[],
+    operation: string,
+  ) {
+    const description =
+      shapeIds.length === 1
+        ? `${operation} shape ${shapeIds[0]}`
+        : `${operation} ${shapeIds.length} shapes`;
     super(previousValue, nextValue, description);
   }
 }

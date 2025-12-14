@@ -1,4 +1,5 @@
 import { Box, Flex, Text } from "@radix-ui/themes";
+
 import type { CollaborativeService } from "../firebase/collaborative";
 
 interface OnlineUsersProps {
@@ -25,7 +26,6 @@ export const OnlineUsers = ({ users, collaborative }: OnlineUsersProps) => {
         minWidth: "90px",
       }}
     >
-
       <Flex align="center" gap="1" wrap="wrap">
         {/* 当前用户 */}
         <Box
@@ -41,7 +41,11 @@ export const OnlineUsers = ({ users, collaborative }: OnlineUsersProps) => {
           }}
           title={`${currentUser.name} (你)`}
         >
-          <Text size="1" weight="bold" style={{ color: "white", fontSize: "7px" }}>
+          <Text
+            size="1"
+            weight="bold"
+            style={{ color: "white", fontSize: "7px" }}
+          >
             {currentUser.name.slice(-1)}
           </Text>
         </Box>
@@ -62,14 +66,21 @@ export const OnlineUsers = ({ users, collaborative }: OnlineUsersProps) => {
             }}
             title={user.name}
           >
-            <Text size="1" weight="bold" style={{ color: "white", fontSize: "7px" }}>
+            <Text
+              size="1"
+              weight="bold"
+              style={{ color: "white", fontSize: "7px" }}
+            >
               {user.name.slice(-1)}
             </Text>
           </Box>
         ))}
 
         {users.length > 4 && (
-          <Text size="1" style={{ color: "#6b7280", fontSize: "8px", marginLeft: "2px" }}>
+          <Text
+            size="1"
+            style={{ color: "#6b7280", fontSize: "8px", marginLeft: "2px" }}
+          >
             +{users.length - 4}
           </Text>
         )}

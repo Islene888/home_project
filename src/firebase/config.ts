@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
-import { getAuth } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
 
 // Firebase配置 - 真实项目配置
 const firebaseConfig = {
@@ -10,7 +10,7 @@ const firebaseConfig = {
   projectId: "voyager-design-editor",
   storageBucket: "voyager-design-editor.firebasestorage.app",
   messagingSenderId: "164979711102",
-  appId: "1:164979711102:web:45ac4b084829d15e8c0c2f"
+  appId: "1:164979711102:web:45ac4b084829d15e8c0c2f",
 };
 
 // 初始化Firebase

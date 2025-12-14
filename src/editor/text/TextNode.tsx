@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import type { TextElement } from "../schema";
 
 interface TextNodeProps {
@@ -29,10 +30,10 @@ const TextNode = ({ text, onContentChange }: TextNodeProps) => {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === 'Escape') {
+    if (event.key === "Enter" || event.key === "Escape") {
       event.preventDefault();
       handleBlur();
-    } else if (event.key === 'Delete' || event.key === 'Backspace') {
+    } else if (event.key === "Delete" || event.key === "Backspace") {
       // Allow normal delete/backspace behavior for character deletion
       event.stopPropagation();
     }
@@ -67,10 +68,7 @@ const TextNode = ({ text, onContentChange }: TextNodeProps) => {
   }
 
   return (
-    <div
-      style={textStyle}
-      onDoubleClick={handleDoubleClick}
-    >
+    <div style={textStyle} onDoubleClick={handleDoubleClick}>
       {text.content}
     </div>
   );

@@ -15,11 +15,11 @@ export const EditorContextMenu = ({
   const { selection, value } = useStore(editor.stateStore);
   const hasSelection = !!selection;
 
-  const selectedElement = selection ? (
-    value.shapes[selection.id] ||
-    value.texts[selection.id] ||
-    value.images[selection.id]
-  ) : null;
+  const selectedElement = selection
+    ? value.shapes[selection.id] ||
+      value.texts[selection.id] ||
+      value.images[selection.id]
+    : null;
 
   const handleDelete = () => {
     if (selection && selectedElement) {

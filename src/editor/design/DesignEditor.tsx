@@ -87,12 +87,12 @@ class DesignEditor {
 
   // Helper method to remove undefined values from objects (for Firebase compatibility)
   #cleanUndefinedValues(obj: any): any {
-    if (obj === null || obj === undefined || typeof obj !== 'object') {
+    if (obj === null || obj === undefined || typeof obj !== "object") {
       return obj;
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.#cleanUndefinedValues(item));
+      return obj.map((item) => this.#cleanUndefinedValues(item));
     }
 
     const cleaned: any = {};
@@ -306,8 +306,10 @@ class DesignEditor {
     const imageId = crypto.randomUUID();
     const previousValue = this.state.value;
     const bounds = {
-      left: payload.left ?? previousValue.attributes.width / 2 - payload.width / 2,
-      top: payload.top ?? previousValue.attributes.height / 2 - payload.height / 2,
+      left:
+        payload.left ?? previousValue.attributes.width / 2 - payload.width / 2,
+      top:
+        payload.top ?? previousValue.attributes.height / 2 - payload.height / 2,
       width: payload.width,
       height: payload.height,
     };
@@ -356,10 +358,17 @@ class DesignEditor {
     };
 
     // Create command for undo/redo
-    const command = new UpdateShapeCommand(previousValue, nextValue, [textId], "Update text content");
+    const command = new UpdateShapeCommand(
+      previousValue,
+      nextValue,
+      [textId],
+      "Update text content",
+    );
     const resultValue = this.#historyManager.executeCommand(command);
 
-    this.#stateStore.setState({ value: this.#cleanUndefinedValues(resultValue) });
+    this.#stateStore.setState({
+      value: this.#cleanUndefinedValues(resultValue),
+    });
     this.#updateHistoryState();
   }
 
@@ -380,10 +389,17 @@ class DesignEditor {
       },
     };
 
-    const command = new UpdateShapeCommand(previousValue, nextValue, [textId], "Update text style");
+    const command = new UpdateShapeCommand(
+      previousValue,
+      nextValue,
+      [textId],
+      "Update text style",
+    );
     const resultValue = this.#historyManager.executeCommand(command);
 
-    this.#stateStore.setState({ value: this.#cleanUndefinedValues(resultValue) });
+    this.#stateStore.setState({
+      value: this.#cleanUndefinedValues(resultValue),
+    });
     this.#updateHistoryState();
   }
 
@@ -435,7 +451,10 @@ class DesignEditor {
     this.#stateStore.setState({ value: this.#cleanUndefinedValues(nextValue) });
   }
 
-  updateImageBounds(imageId: ID, bounds: { left: number; top: number; width: number; height: number }) {
+  updateImageBounds(
+    imageId: ID,
+    bounds: { left: number; top: number; width: number; height: number },
+  ) {
     const previousValue = this.state.value;
     const currentImage = previousValue.images[imageId];
 
@@ -472,10 +491,17 @@ class DesignEditor {
       },
     };
 
-    const command = new UpdateShapeCommand(previousValue, nextValue, [imageId], "Update image opacity");
+    const command = new UpdateShapeCommand(
+      previousValue,
+      nextValue,
+      [imageId],
+      "Update image opacity",
+    );
     const resultValue = this.#historyManager.executeCommand(command);
 
-    this.#stateStore.setState({ value: this.#cleanUndefinedValues(resultValue) });
+    this.#stateStore.setState({
+      value: this.#cleanUndefinedValues(resultValue),
+    });
     this.#updateHistoryState();
   }
 
@@ -491,7 +517,9 @@ class DesignEditor {
     const nextValue = {
       ...previousValue,
       shapes: Object.fromEntries(
-        Object.entries(previousValue.shapes).filter(([id]) => !deleteIds.includes(id)),
+        Object.entries(previousValue.shapes).filter(
+          ([id]) => !deleteIds.includes(id),
+        ),
       ),
     };
 
@@ -518,7 +546,9 @@ class DesignEditor {
     const nextValue = {
       ...previousValue,
       texts: Object.fromEntries(
-        Object.entries(previousValue.texts).filter(([id]) => !deleteIds.includes(id)),
+        Object.entries(previousValue.texts).filter(
+          ([id]) => !deleteIds.includes(id),
+        ),
       ),
     };
 
@@ -545,7 +575,9 @@ class DesignEditor {
     const nextValue = {
       ...previousValue,
       images: Object.fromEntries(
-        Object.entries(previousValue.images).filter(([id]) => !deleteIds.includes(id)),
+        Object.entries(previousValue.images).filter(
+          ([id]) => !deleteIds.includes(id),
+        ),
       ),
     };
 
@@ -579,102 +611,114 @@ class DesignEditor {
       weight: 4,
     };
 
-    const { nextValue } = this.#updateShapes(
-      previousValue,
-      ids,
-      (shape) => {
-        let updatedShape = { ...shape };
+    const { nextValue } = this.#updateShapes(previousValue, ids, (shape) => {
+      let updatedShape = { ...shape };
 
-        // Handle stroke memory - 简化逻辑
+      // Handle stroke memory - 简化逻辑
+      if (attributes.stroke !== undefined) {
+        if (attributes.stroke === null) {
+          // Disabling stroke - remember current settings if available
+          const currentStroke = shape.paths[0]?.stroke;
+          if (currentStroke) {
+            updatedShape.rememberedStroke = {
+              color: currentStroke.color || defaultStroke.color,
+              weight: currentStroke.weight || defaultStroke.weight,
+            };
+          }
+        } else {
+          // Enabling stroke - save the provided attributes
+          updatedShape.rememberedStroke = {
+            color: attributes.stroke.color || defaultStroke.color,
+            weight: attributes.stroke.weight || defaultStroke.weight,
+          };
+        }
+      }
+
+      // Handle fill changes with memory persistence
+      if (attributes.fill !== undefined) {
+        const currentFill = shape.paths[0]?.fill;
+
+        if (attributes.fill === null) {
+          // Disabling fill - remember current settings
+          if (currentFill) {
+            updatedShape.rememberedFill = currentFill;
+          }
+        } else {
+          // Enabling or updating fill
+          updatedShape.rememberedFill = attributes.fill;
+        }
+      }
+
+      // Update paths with new attributes
+      updatedShape.paths = shape.paths.map((path) => {
+        const updatedPath: any = { ...path };
+
+        // Handle stroke updates - 简化逻辑
         if (attributes.stroke !== undefined) {
           if (attributes.stroke === null) {
-            // Disabling stroke - remember current settings if available
-            const currentStroke = shape.paths[0]?.stroke;
-            if (currentStroke) {
-              updatedShape.rememberedStroke = {
-                color: currentStroke.color || defaultStroke.color,
-                weight: currentStroke.weight || defaultStroke.weight,
-              };
-            }
+            // Remove stroke property entirely
+            delete updatedPath.stroke;
           } else {
-            // Enabling stroke - save the provided attributes
-            updatedShape.rememberedStroke = {
+            // Create stroke with only the provided attributes
+            updatedPath.stroke = {
               color: attributes.stroke.color || defaultStroke.color,
               weight: attributes.stroke.weight || defaultStroke.weight,
             };
+
+            // Only add dasharray if it's explicitly provided
+            if (attributes.stroke.dasharray) {
+              updatedPath.stroke.dasharray = attributes.stroke.dasharray;
+            }
           }
         }
 
-        // Handle fill changes with memory persistence
+        // Handle fill updates
         if (attributes.fill !== undefined) {
-          const currentFill = shape.paths[0]?.fill;
-
           if (attributes.fill === null) {
-            // Disabling fill - remember current settings
-            if (currentFill) {
-              updatedShape.rememberedFill = currentFill;
-            }
+            // Remove fill property entirely instead of setting to undefined
+            delete updatedPath.fill;
           } else {
-            // Enabling or updating fill
-            updatedShape.rememberedFill = attributes.fill;
+            // Update fill with new values
+            updatedPath.fill = attributes.fill;
           }
         }
 
-        // Update paths with new attributes
-        updatedShape.paths = shape.paths.map((path) => {
-          const updatedPath: any = { ...path };
+        // Only add default fill if this is a stroke-only shape being disabled
+        // and it doesn't already have a fill
+        if (
+          !updatedPath.stroke &&
+          !updatedPath.fill &&
+          attributes.stroke === null
+        ) {
+          updatedPath.fill = { color: "#f8f9fa" };
+        }
 
-          // Handle stroke updates - 简化逻辑
-          if (attributes.stroke !== undefined) {
-            if (attributes.stroke === null) {
-              // Remove stroke property entirely
-              delete updatedPath.stroke;
-            } else {
-              // Create stroke with only the provided attributes
-              updatedPath.stroke = {
-                color: attributes.stroke.color || defaultStroke.color,
-                weight: attributes.stroke.weight || defaultStroke.weight,
-              };
+        return updatedPath;
+      });
 
-              // Only add dasharray if it's explicitly provided
-              if (attributes.stroke.dasharray) {
-                updatedPath.stroke.dasharray = attributes.stroke.dasharray;
-              }
-            }
-          }
+      return updatedShape;
+    });
 
-          // Handle fill updates
-          if (attributes.fill !== undefined) {
-            if (attributes.fill === null) {
-              // Remove fill property entirely instead of setting to undefined
-              delete updatedPath.fill;
-            } else {
-              // Update fill with new values
-              updatedPath.fill = attributes.fill;
-            }
-          }
+    const operation =
+      attributes.stroke !== undefined
+        ? attributes.stroke === null
+          ? "Remove stroke"
+          : "Update stroke"
+        : attributes.fill === null
+          ? "Remove fill"
+          : "Update fill";
 
-          // Only add default fill if this is a stroke-only shape being disabled
-          // and it doesn't already have a fill
-          if (!updatedPath.stroke && !updatedPath.fill && attributes.stroke === null) {
-            updatedPath.fill = { color: "#f8f9fa" };
-          }
-
-          return updatedPath;
-        });
-
-        return updatedShape;
-      }
+    const command = new UpdateShapeCommand(
+      previousValue,
+      nextValue,
+      ids,
+      operation,
     );
-
-    const operation = attributes.stroke !== undefined
-      ? (attributes.stroke === null ? "Remove stroke" : "Update stroke")
-      : (attributes.fill === null ? "Remove fill" : "Update fill");
-
-    const command = new UpdateShapeCommand(previousValue, nextValue, ids, operation);
     const resultValue = this.#historyManager.executeCommand(command);
 
-    this.#stateStore.setState({ value: this.#cleanUndefinedValues(resultValue) });
+    this.#stateStore.setState({
+      value: this.#cleanUndefinedValues(resultValue),
+    });
     this.#updateHistoryState();
   }
 }
