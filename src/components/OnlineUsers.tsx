@@ -1,5 +1,4 @@
 import { Box, Flex, Text } from "@radix-ui/themes";
-import { Users } from "lucide-react";
 import type { CollaborativeService } from "../firebase/collaborative";
 
 interface OnlineUsersProps {
@@ -26,24 +25,6 @@ export const OnlineUsers = ({ users, collaborative }: OnlineUsersProps) => {
         minWidth: "90px",
       }}
     >
-      <Flex align="center" gap="1" mb="1">
-        <Box
-          style={{
-            width: "16px",
-            height: "16px",
-            borderRadius: "4px",
-            background: "#000000",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Users size={8} color="white" />
-        </Box>
-        <Text size="1" style={{ color: "#1a1a1a", fontSize: "11px", fontWeight: "500" }}>
-          在线 {users.length + 1}
-        </Text>
-      </Flex>
 
       <Flex align="center" gap="1" wrap="wrap">
         {/* 当前用户 */}

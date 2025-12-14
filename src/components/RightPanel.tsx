@@ -131,9 +131,9 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
 
           {/* AI优化选项 - 简化设计 */}
           {selectedText.content.trim() && (
-            <RightPanelSection title="AI 文字优化">
+            <RightPanelSection title="AI Text Optimization">
               {isAIOptimizing ? (
-                <Text size="2" color="blue">🤖 正在处理...</Text>
+                <Text size="2" color="blue">🤖 Processing...</Text>
               ) : (
                 <Flex direction="column" gap="2">
                   <Flex gap="1" wrap="wrap">
@@ -147,7 +147,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         borderRadius: "4px"
                       }}
                     >
-                      润色
+                      Polish
                     </Button>
                     <Button
                       size="1"
@@ -159,7 +159,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         borderRadius: "4px"
                       }}
                     >
-                      简化
+                      Simplify
                     </Button>
                     <Button
                       size="1"
@@ -171,7 +171,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         borderRadius: "4px"
                       }}
                     >
-                      详细
+                      Detail
                     </Button>
                   </Flex>
                   <Flex gap="1" wrap="wrap">
@@ -185,7 +185,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         borderRadius: "4px"
                       }}
                     >
-                      正式
+                      Formal
                     </Button>
                     <Button
                       size="1"
@@ -197,7 +197,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         borderRadius: "4px"
                       }}
                     >
-                      随意
+                      Casual
                     </Button>
                     <Button
                       size="1"
@@ -209,7 +209,7 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
                         borderRadius: "4px"
                       }}
                     >
-                      创意
+                      Creative
                     </Button>
                   </Flex>
                 </Flex>
