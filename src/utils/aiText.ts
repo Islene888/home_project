@@ -152,12 +152,18 @@ const toneRules = {
 
 // 使用OpenAI API进行文字优化
 export async function optimizeText(text: string, options: TextOptimizationOptions): Promise<TextSuggestion> {
-  console.log('optimizeText called with:', text, options);
+  console.log('=== optimizeText called ===');
+  console.log('Text:', text);
+  console.log('Options:', options);
+  console.log('OpenAI available:', !!openai);
+  console.log('API Key available:', !!import.meta.env.VITE_OPENAI_API_KEY);
 
   // 如果没有OpenAI客户端或API密钥，直接使用备用方案
   if (!openai || !import.meta.env.VITE_OPENAI_API_KEY) {
-    console.log('OpenAI not available, using fallback');
-    return fallbackOptimizeText(text, options);
+    console.log('Using fallback optimization...');
+    const result = fallbackOptimizeText(text, options);
+    console.log('Fallback result:', result);
+    return result;
   }
 
   try {
@@ -220,6 +226,10 @@ export async function optimizeText(text: string, options: TextOptimizationOption
 
 // 备用优化函数（使用预定义规则）
 function fallbackOptimizeText(text: string, options: TextOptimizationOptions): TextSuggestion {
+  console.log('=== fallbackOptimizeText called ===');
+  console.log('Input text:', text);
+  console.log('Options:', options);
+
   let optimizedText = text;
   let reason = "";
 
@@ -351,11 +361,19 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
       break;
   }
 
-  return {
+  const result = {
     original: text,
     suggestion: optimizedText,
     reason: `${reason} (Offline mode)`
   };
+
+  console.log('=== fallbackOptimizeText result ===');
+  console.log('Original:', result.original);
+  console.log('Suggestion:', result.suggestion);
+  console.log('Same?', result.suggestion === result.original);
+  console.log('Reason:', result.reason);
+
+  return result;
 }
 
 // 快速建议 - 提供多个选项
