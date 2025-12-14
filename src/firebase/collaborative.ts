@@ -68,7 +68,7 @@ export class CollaborativeService {
   }
 
   // 同步设计数据
-  syncDesign(designValue: DesignValue, onUpdate: (value: DesignValue) => void) {
+  syncDesign(_designValue: DesignValue, onUpdate: (value: DesignValue) => void) {
     const designRef = ref(database, `rooms/${this.roomId}/design`);
 
     // 监听远程更新

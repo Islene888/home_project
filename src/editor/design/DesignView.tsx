@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useStore } from "zustand";
 
-import { isPointHitLayout } from "../math/hitTests";
+// import { isPointHitLayout } from "../math/hitTests";
 import { ShapeDef, Element } from "../schema";
 import { type Selection, SelectionArea } from "../selection";
 import TextSelectionArea from "../selection/TextSelectionArea";
@@ -206,7 +206,7 @@ const DesignView = ({ editor, currentTool, onToolChange }: DesignViewProps) => {
                 dragTimeoutRef.current = null;
               }, 250);
             }}
-            onDoubleClick={(event) => {
+            onDoubleClick={() => {
               isDoubleClickingRef.current = true;
 
               // Clear any pending drag operation

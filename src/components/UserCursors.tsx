@@ -1,4 +1,4 @@
-import { Box, Text } from "@radix-ui/themes";
+import { Box } from "@radix-ui/themes";
 import { MousePointer2 } from "lucide-react";
 
 interface UserCursorsProps {

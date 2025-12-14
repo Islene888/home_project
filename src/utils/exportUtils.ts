@@ -289,7 +289,7 @@ const downloadCanvas = (canvas: HTMLCanvasElement, filename: string) => {
 };
 
 // PDF导出功能
-export const exportToPDF = async (canvasElement: HTMLElement, designValue: any, filename: string = 'design') => {
+export const exportToPDF = async (_canvasElement: HTMLElement, designValue: any, filename: string = 'design') => {
   try {
     console.log('Starting PDF export using SVG method...');
 
