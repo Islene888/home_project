@@ -29,9 +29,9 @@ const generateUserColor = () => {
 
 export class CollaborativeService {
   private roomId: string;
-  private userId: string;
-  private userName: string;
-  private userColor: string;
+  private userId!: string;
+  private userName!: string;
+  private userColor!: string;
   private listeners: Map<string, () => void> = new Map();
 
   constructor(roomId = "default-room") {
@@ -40,26 +40,42 @@ export class CollaborativeService {
     // 尝试从sessionStorage获取已有的用户信息
     const existingUser = sessionStorage.getItem("voyager-user");
     if (existingUser) {
-      const userData = JSON.parse(existingUser);
-      this.userId = userData.id;
-      this.userName = userData.name;
-      this.userColor = userData.color;
+      try {
+        const userData = JSON.parse(existingUser);
+        if (userData && userData.id && userData.name && userData.color) {
+          this.userId = userData.id;
+          this.userName = userData.name;
+          this.userColor = userData.color;
+          // 设置用户在线状态
+          this.setupPresence();
+        } else {
+          throw new Error("Invalid user data");
+        }
+      } catch (error) {
+        // 清理无效的sessionStorage数据
+        sessionStorage.removeItem("voyager-user");
+        this.createNewUser();
+      }
     } else {
-      // 创建新用户
-      this.userId = generateUserId();
-      this.userName = `用户${this.userId.slice(-4)}`;
-      this.userColor = generateUserColor();
-
-      // 保存到sessionStorage
-      sessionStorage.setItem(
-        "voyager-user",
-        JSON.stringify({
-          id: this.userId,
-          name: this.userName,
-          color: this.userColor,
-        }),
-      );
+      this.createNewUser();
     }
+  }
+
+  private createNewUser() {
+    // 创建新用户
+    this.userId = generateUserId();
+    this.userName = `用户${this.userId.slice(-4)}`;
+    this.userColor = generateUserColor();
+
+    // 保存到sessionStorage
+    sessionStorage.setItem(
+      "voyager-user",
+      JSON.stringify({
+        id: this.userId,
+        name: this.userName,
+        color: this.userColor,
+      }),
+    );
 
     // 设置用户在线状态
     this.setupPresence();
@@ -125,12 +141,14 @@ export class CollaborativeService {
     let presence: any = {};
 
     const updateUsers = () => {
+      if (!users || !presence) return;
+
       const onlineUsers = Object.values(users).filter(
-        (user: any) => presence[user.id],
+        (user: any) => user && user.id && presence[user.id],
       );
       // 过滤掉当前用户，避免重复显示
       const otherUsers = onlineUsers.filter(
-        (user: any) => user.id !== this.userId,
+        (user: any) => user && user.id !== this.userId,
       );
       callback(otherUsers);
     };
@@ -154,8 +172,10 @@ export class CollaborativeService {
 
   // 清理离线用户数据
   private cleanupOfflineUsers(users: any, presence: any) {
+    if (!users || !presence) return;
+
     Object.keys(users).forEach((userId) => {
-      if (!presence[userId]) {
+      if (userId && !presence[userId]) {
         // 用户已离线，清理其数据
         const userRef = ref(database, `rooms/${this.roomId}/users/${userId}`);
         const cursorRef = ref(
@@ -198,7 +218,7 @@ export class CollaborativeService {
       const data = snapshot.val() || {};
       // 过滤掉自己的光标
       const otherCursors = Object.values(data).filter(
-        (cursor: any) => cursor.name !== this.userName,
+        (cursor: any) => cursor && cursor.name && cursor.name !== this.userName,
       );
       callback(otherCursors);
     });
