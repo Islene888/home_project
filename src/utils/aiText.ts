@@ -34,9 +34,14 @@ const improvementRules = [
     reason: "Using stronger positive language"
   },
   {
-    pattern: /\b(good|nice)\b/gi,
+    pattern: /\b(good)\b/gi,
     replacement: "outstanding",
     reason: "Enhanced descriptive language"
+  },
+  {
+    pattern: /\b(nice)\b/gi,
+    replacement: "fantastic",
+    reason: "More enthusiastic expression"
   },
   {
     pattern: /\b(big)\b/gi,
@@ -52,6 +57,16 @@ const improvementRules = [
     pattern: /\b(fast)\b/gi,
     replacement: "efficient",
     reason: "Professional terminology"
+  },
+  {
+    pattern: /\b(text|content)\b/gi,
+    replacement: "compelling content",
+    reason: "More engaging description"
+  },
+  {
+    pattern: /\b(hello|hi)\b/gi,
+    replacement: "welcome",
+    reason: "More polished greeting"
   }
 ];
 
@@ -210,6 +225,7 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
 
   switch (options.action) {
     case "improve":
+      // 尝试应用改进规则
       for (const rule of improvementRules) {
         if (rule.pattern.test(optimizedText)) {
           optimizedText = optimizedText.replace(rule.pattern, rule.replacement);
@@ -217,9 +233,17 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
           break;
         }
       }
+      // 如果没有匹配的规则，提供通用改进
       if (reason === "") {
+        // 首字母大写
         optimizedText = text.charAt(0).toUpperCase() + text.slice(1);
-        reason = "Capitalized first letter for better presentation";
+        // 如果已经是大写，添加强调词
+        if (optimizedText === text) {
+          optimizedText = `✨ ${text}`;
+          reason = "Added emphasis for impact";
+        } else {
+          reason = "Capitalized first letter for better presentation";
+        }
       }
       break;
 
@@ -232,8 +256,23 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
         }
       }
       if (reason === "") {
-        optimizedText = text.replace(/\b(very|really|quite|rather)\s+/gi, "");
-        reason = "Removed unnecessary qualifying words";
+        // 移除限定词
+        let shortened = text.replace(/\b(very|really|quite|rather|extremely|incredibly)\s+/gi, "");
+        if (shortened !== text) {
+          optimizedText = shortened;
+          reason = "Removed unnecessary qualifying words";
+        } else {
+          // 如果没有限定词，尝试其他简化
+          shortened = text.replace(/\s+and\s+/gi, " & ");
+          if (shortened !== text) {
+            optimizedText = shortened;
+            reason = "Used shorter connectors";
+          } else {
+            // 最后尝试去掉多余空格和标点
+            optimizedText = text.replace(/\s+/g, " ").trim().replace(/[,;]\s*$/, "");
+            reason = "Cleaned up spacing and punctuation";
+          }
+        }
       }
       break;
 
@@ -261,7 +300,33 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
         }
       }
       if (reason === "") {
-        reason = `Adjusted to ${options.tone} tone`;
+        // 提供基于语气的通用调整
+        switch (options.tone) {
+          case "professional":
+            if (!/[.!?]$/.test(text)) {
+              optimizedText = text + ".";
+              reason = "Added period for professional tone";
+            } else {
+              optimizedText = text.charAt(0).toUpperCase() + text.slice(1);
+              reason = "Capitalized for professional presentation";
+            }
+            break;
+          case "casual":
+            optimizedText = text.toLowerCase().replace(/[.!]$/, "");
+            if (optimizedText === text.toLowerCase()) {
+              optimizedText = "hey, " + text.toLowerCase();
+              reason = "Added casual greeting";
+            } else {
+              reason = "Made more casual and relaxed";
+            }
+            break;
+          case "creative":
+            optimizedText = `🎨 ${text} ✨`;
+            reason = "Added creative flourishes";
+            break;
+          default:
+            reason = `Adjusted to ${options.tone} tone`;
+        }
       }
       break;
   }
