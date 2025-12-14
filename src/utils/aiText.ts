@@ -15,15 +15,24 @@ export interface TextSuggestion {
 // 初始化 OpenAI 客户端
 let openai: OpenAI | null = null;
 
+console.log('=== OpenAI Initialization ===');
+console.log('Environment:', import.meta.env.MODE);
+console.log('API Key exists:', !!import.meta.env.VITE_OPENAI_API_KEY);
+console.log('API Key preview:', import.meta.env.VITE_OPENAI_API_KEY ? `${import.meta.env.VITE_OPENAI_API_KEY.slice(0, 10)}...` : 'Not found');
+
 try {
   if (import.meta.env.VITE_OPENAI_API_KEY) {
+    console.log('Creating OpenAI client...');
     openai = new OpenAI({
       apiKey: import.meta.env.VITE_OPENAI_API_KEY,
       dangerouslyAllowBrowser: true // 注意：生产环境应该使用后端代理
     });
+    console.log('OpenAI client created successfully');
+  } else {
+    console.warn('VITE_OPENAI_API_KEY not found in environment variables');
   }
 } catch (error) {
-  console.warn('OpenAI client initialization failed:', error);
+  console.error('OpenAI client initialization failed:', error);
 }
 
 // 预定义的文字优化规则 - 更全面的词汇替换
@@ -193,13 +202,15 @@ export async function optimizeText(text: string, options: TextOptimizationOption
   console.log('OpenAI available:', !!openai);
   console.log('API Key available:', !!import.meta.env.VITE_OPENAI_API_KEY);
 
-  // 如果没有OpenAI客户端或API密钥，直接使用备用方案
+  // 检查OpenAI可用性，但先尝试API调用
   if (!openai || !import.meta.env.VITE_OPENAI_API_KEY) {
-    console.log('Using fallback optimization...');
+    console.log('OpenAI not available, using fallback optimization...');
     const result = fallbackOptimizeText(text, options);
     console.log('Fallback result:', result);
     return result;
   }
+
+  console.log('OpenAI client available, attempting API call...');
 
   try {
     let prompt = "";
@@ -253,8 +264,13 @@ export async function optimizeText(text: string, options: TextOptimizationOption
     };
 
   } catch (error) {
-    console.error('OpenAI API Error:', error);
+    console.error('=== OpenAI API Error ===');
+    console.error('Error details:', error);
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+
     // 如果API调用失败，回退到预定义规则
+    console.log('Falling back to local rules...');
     return fallbackOptimizeText(text, options);
   }
 }
