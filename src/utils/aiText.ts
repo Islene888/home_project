@@ -26,7 +26,7 @@ try {
   console.warn('OpenAI client initialization failed:', error);
 }
 
-// 预定义的文字优化规则
+// 预定义的文字优化规则 - 更全面的词汇替换
 const improvementRules = [
   {
     pattern: /\b(ok|okay)\b/gi,
@@ -44,6 +44,21 @@ const improvementRules = [
     reason: "More enthusiastic expression"
   },
   {
+    pattern: /\b(great)\b/gi,
+    replacement: "exceptional",
+    reason: "More impactful language"
+  },
+  {
+    pattern: /\b(cool)\b/gi,
+    replacement: "impressive",
+    reason: "More professional tone"
+  },
+  {
+    pattern: /\b(awesome)\b/gi,
+    replacement: "remarkable",
+    reason: "Elevated vocabulary"
+  },
+  {
     pattern: /\b(big)\b/gi,
     replacement: "substantial",
     reason: "More precise terminology"
@@ -54,9 +69,19 @@ const improvementRules = [
     reason: "More descriptive language"
   },
   {
-    pattern: /\b(fast)\b/gi,
+    pattern: /\b(fast|quick)\b/gi,
     replacement: "efficient",
     reason: "Professional terminology"
+  },
+  {
+    pattern: /\b(easy)\b/gi,
+    replacement: "straightforward",
+    reason: "More sophisticated expression"
+  },
+  {
+    pattern: /\b(hard|difficult)\b/gi,
+    replacement: "challenging",
+    reason: "More positive framing"
   },
   {
     pattern: /\b(text|content)\b/gi,
@@ -65,8 +90,18 @@ const improvementRules = [
   },
   {
     pattern: /\b(hello|hi)\b/gi,
-    replacement: "welcome",
+    replacement: "greetings",
     reason: "More polished greeting"
+  },
+  {
+    pattern: /\b(make|create)\b/gi,
+    replacement: "craft",
+    reason: "More elegant verb choice"
+  },
+  {
+    pattern: /\b(help)\b/gi,
+    replacement: "assist",
+    reason: "More formal language"
   }
 ];
 
@@ -243,18 +278,31 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
           break;
         }
       }
-      // 如果没有匹配的规则，提供通用改进
+      // 如果没有匹配的规则，提供智能改进
       if (reason === "") {
-        // 首字母大写
+        // 1. 首字母大写
         const capitalized = text.charAt(0).toUpperCase() + text.slice(1);
 
         if (capitalized !== text) {
           optimizedText = capitalized;
           reason = "Capitalized first letter for better presentation";
         } else {
-          // 如果已经是大写，添加强调词
-          optimizedText = `Enhanced: ${text}`;
-          reason = "Added enhancement prefix for impact";
+          // 2. 添加句号使其更正式
+          if (!text.endsWith('.') && !text.endsWith('!') && !text.endsWith('?')) {
+            optimizedText = text + '.';
+            reason = "Added period for polished presentation";
+          } else {
+            // 3. 移除多余空格并优化格式
+            const cleaned = text.replace(/\s+/g, ' ').trim();
+            if (cleaned !== text) {
+              optimizedText = cleaned;
+              reason = "Cleaned up spacing for better formatting";
+            } else {
+              // 4. 最后选择：添加优化标记
+              optimizedText = `✨ ${text}`;
+              reason = "Added polish symbol for enhanced appeal";
+            }
+          }
         }
       }
       break;
