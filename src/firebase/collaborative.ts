@@ -115,8 +115,12 @@ export class CollaborativeService {
     // 监听远程更新
     const unsubscribe = onValue(designRef, (snapshot) => {
       const data = snapshot.val();
-      if (data && data.lastUpdatedBy !== this.userId) {
-        onUpdate(data.value);
+      if (data && typeof data === 'object' && data.lastUpdatedBy !== this.userId && data.value) {
+        try {
+          onUpdate(data.value);
+        } catch (error) {
+          // 忽略无效的数据更新
+        }
       }
     });
 

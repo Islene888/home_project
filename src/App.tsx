@@ -96,11 +96,11 @@ function App() {
       // Delete key for element deletion
       if (event.key === "Delete" || event.key === "Backspace") {
         const { selection, value } = editor.state;
-        if (selection) {
+        if (selection && value) {
           event.preventDefault();
-          const selectedShape = value.shapes[selection.id];
-          const selectedText = value.texts[selection.id];
-          const selectedImage = value.images[selection.id];
+          const selectedShape = value.shapes?.[selection.id];
+          const selectedText = value.texts?.[selection.id];
+          const selectedImage = value.images?.[selection.id];
 
           if (selectedShape) {
             editor.deleteShapes([selection.id]);
