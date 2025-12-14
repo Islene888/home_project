@@ -38,8 +38,7 @@ const useDragGesture = <Snapshot>({
 
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
-    } catch (error) {
-      console.warn('Failed to set pointer capture:', error);
+    } catch {
       // Continue without pointer capture if it fails
     }
 

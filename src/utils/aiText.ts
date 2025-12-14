@@ -14,10 +14,7 @@ export interface TextSuggestion {
 
 // 测试函数 - 直接测试 OpenAI API
 export async function testOpenAIConnection(): Promise<{ success: boolean; error?: string; response?: any }> {
-  console.log('=== Testing OpenAI Connection ===');
-
   const apiKey = getApiKey();
-  console.log('Testing with API key:', apiKey ? `${apiKey.slice(0, 10)}...` : 'None');
 
   if (!apiKey) {
     return { success: false, error: 'No API key found' };
@@ -29,14 +26,12 @@ export async function testOpenAIConnection(): Promise<{ success: boolean; error?
       dangerouslyAllowBrowser: true
     });
 
-    console.log('Making test API call...');
     const completion = await testClient.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: "Say hello" }],
       max_tokens: 10
     });
 
-    console.log('Test API call successful:', completion);
     return { success: true, response: completion };
   } catch (error) {
     console.error('Test API call failed:', error);
@@ -52,31 +47,20 @@ const getApiKey = () => {
   try {
     return import.meta.env?.VITE_OPENAI_API_KEY || null;
   } catch (error) {
-    console.warn('Failed to access environment variables:', error);
     return null;
   }
 };
 
-console.log('=== OpenAI Initialization ===');
-console.log('Environment:', import.meta.env?.MODE || 'unknown');
-
 const apiKey = getApiKey();
-console.log('API Key exists:', !!apiKey);
-console.log('API Key preview:', apiKey ? `${apiKey.slice(0, 10)}...` : 'Not found');
 
 try {
   if (apiKey && typeof apiKey === 'string' && apiKey.startsWith('sk-')) {
-    console.log('Creating OpenAI client...');
     openai = new OpenAI({
       apiKey: apiKey,
       dangerouslyAllowBrowser: true // 注意：生产环境应该使用后端代理
     });
-    console.log('OpenAI client created successfully');
-  } else {
-    console.warn('Valid VITE_OPENAI_API_KEY not found in environment variables');
   }
 } catch (error) {
-  console.error('OpenAI client initialization failed:', error);
   openai = null;
 }
 
@@ -241,26 +225,10 @@ const toneRules = {
 
 // 使用OpenAI API进行文字优化
 export async function optimizeText(text: string, options: TextOptimizationOptions): Promise<TextSuggestion> {
-  console.log('=== optimizeText called ===');
-  console.log('Text:', text);
-  console.log('Options:', options);
-  console.log('Action:', options.action);
-  if ('tone' in options) {
-    console.log('Tone:', options.tone);
-  }
-  console.log('OpenAI available:', !!openai);
-  const apiKey = getApiKey();
-  console.log('API Key available:', !!apiKey);
-
   // 检查OpenAI可用性，但先尝试API调用
   if (!openai || !getApiKey()) {
-    console.log('OpenAI not available, using fallback optimization...');
-    const result = fallbackOptimizeText(text, options);
-    console.log('Fallback result:', result);
-    return result;
+    return fallbackOptimizeText(text, options);
   }
-
-  console.log('OpenAI client available, attempting API call...');
 
   try {
     let prompt = "";
@@ -286,8 +254,6 @@ export async function optimizeText(text: string, options: TextOptimizationOption
         break;
     }
 
-    console.log('Making API call with prompt:', prompt);
-
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
@@ -297,8 +263,6 @@ export async function optimizeText(text: string, options: TextOptimizationOption
       temperature: 0.7,
     });
 
-    console.log('OpenAI API Response:', completion);
-
     // Safely access the response with proper null checks
     const firstChoice = completion?.choices?.[0];
     const messageContent = firstChoice?.message?.content;
@@ -306,10 +270,9 @@ export async function optimizeText(text: string, options: TextOptimizationOption
 
     // Additional validation to ensure we have valid content
     if (!firstChoice || !messageContent) {
-      console.warn('OpenAI API returned invalid response structure');
       return fallbackOptimizeText(text, options);
     }
-    console.log('Extracted suggestion:', suggestion);
+
     const actionMap = {
       improve: "Enhanced with AI to be more engaging",
       shorten: "Condensed for clarity and brevity",
@@ -324,33 +287,13 @@ export async function optimizeText(text: string, options: TextOptimizationOption
     };
 
   } catch (error) {
-    console.error('=== OpenAI API Error ===');
-    console.error('Error details:', error);
-    console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
-    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
-
-    // Check for specific OpenAI API errors
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        console.error('API Key issue detected');
-      } else if (error.message.includes('rate limit')) {
-        console.error('Rate limit exceeded');
-      } else if (error.message.includes('network')) {
-        console.error('Network connectivity issue');
-      }
-    }
-
     // 如果API调用失败，回退到预定义规则
-    console.log('Falling back to local rules...');
     return fallbackOptimizeText(text, options);
   }
 }
 
 // 备用优化函数（使用预定义规则）
 function fallbackOptimizeText(text: string, options: TextOptimizationOptions): TextSuggestion {
-  console.log('=== fallbackOptimizeText called ===');
-  console.log('Input text:', text);
-  console.log('Options:', options);
 
   let optimizedText = text;
   let reason = "";
@@ -502,18 +445,12 @@ function fallbackOptimizeText(text: string, options: TextOptimizationOptions): T
     reason: `${reason} (Offline mode)`
   };
 
-  console.log('=== fallbackOptimizeText result ===');
-  console.log('Original:', result.original);
-  console.log('Suggestion:', result.suggestion);
-  console.log('Same?', result.suggestion === result.original);
-  console.log('Reason:', result.reason);
 
   return result;
 }
 
 // 快速建议 - 提供多个选项
 export async function getTextSuggestions(text: string): Promise<TextSuggestion[]> {
-  console.log('getTextSuggestions called with:', text);
 
   // 如果文本太短或为空，先提供一些备用建议
   if (!text || text.trim().length < 2) {
@@ -528,7 +465,6 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
 
   // 如果没有OpenAI客户端，直接使用备用方案
   if (!openai || !getApiKey()) {
-    console.log('OpenAI not available, using fallback suggestions');
     return getFallbackSuggestions(text);
   }
 
@@ -542,36 +478,19 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
   ];
 
   try {
-    console.log('Attempting API calls...');
     // 并行调用API获取建议
     const results = await Promise.all(
       options.map(option => optimizeText(text, option))
     );
 
-    console.log('API results:', results);
-
     for (const result of results) {
-      console.log('Processing result:', {
-        original: result.original,
-        suggestion: result.suggestion,
-        same: result.suggestion === text,
-        empty: result.suggestion.trim() === '',
-        reason: result.reason
-      });
-
       if (result.suggestion !== text && result.suggestion.trim() !== '') {
         suggestions.push(result);
-        console.log('Added suggestion:', result.suggestion);
-      } else {
-        console.log('Skipped suggestion - same as original or empty');
       }
     }
 
-    console.log('Final suggestions count:', suggestions.length);
-
     // 如果API没有返回有效建议，使用备用方案
     if (suggestions.length === 0) {
-      console.log('No API suggestions, using fallback');
       return getFallbackSuggestions(text);
     }
 
@@ -585,7 +504,6 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
 
 // 备用建议函数
 function getFallbackSuggestions(text: string): TextSuggestion[] {
-  console.log('getFallbackSuggestions called with:', text);
   const suggestions: TextSuggestion[] = [];
 
   const fallbackOptions = [
@@ -596,7 +514,6 @@ function getFallbackSuggestions(text: string): TextSuggestion[] {
 
   for (const option of fallbackOptions) {
     const result = fallbackOptimizeText(text, option);
-    console.log(`Fallback ${option.action}:`, result);
     if (result.suggestion !== text) {
       suggestions.push(result);
     }
@@ -604,7 +521,6 @@ function getFallbackSuggestions(text: string): TextSuggestion[] {
 
   // 如果还是没有建议，提供一些强制性的通用建议
   if (suggestions.length === 0) {
-    console.log('No fallback suggestions worked, providing default suggestions');
 
     // 提供多个不同的建议选项
     const defaultSuggestions = [
@@ -643,6 +559,5 @@ function getFallbackSuggestions(text: string): TextSuggestion[] {
     }
   }
 
-  console.log('Final fallback suggestions:', suggestions);
   return suggestions.slice(0, 3);
 }

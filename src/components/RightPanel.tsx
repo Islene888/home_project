@@ -58,18 +58,13 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
   // 处理异步优化操作
   const handleOptimizeText = async (action: "improve" | "shorten" | "expand" | "tone", tone?: "professional" | "casual" | "creative") => {
     if (!selectedText) {
-      console.warn('No text selected');
       return;
     }
 
     // 防止空文本或过短文本
     if (!selectedText.content || selectedText.content.trim().length < 1) {
-      console.warn('Text content is empty or too short');
       return;
     }
-
-    console.log(`=== Button clicked: ${action}${tone ? ` (${tone})` : ''} ===`);
-    console.log('Selected text content:', selectedText.content);
 
     setIsAIOptimizing(true);
     try {
@@ -77,32 +72,18 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
         ? { action: "tone" as const, tone }
         : { action: action as "improve" | "shorten" | "expand" };
 
-      console.log('Calling optimizeText with:', { text: selectedText.content, options });
-
       const result = await optimizeText(selectedText.content, options);
-      console.log('OptimizeText result:', result);
 
       // 确保结果有效并且与原文不同
       if (result && result.suggestion && result.suggestion.trim()) {
-        console.log('Original text:', selectedText.content);
-        console.log('New suggestion:', result.suggestion);
-        console.log('Are they different?', result.suggestion !== selectedText.content);
-
         if (result.suggestion !== selectedText.content) {
           editor.updateTextContent(selectedText.id, result.suggestion);
-          console.log('✅ Text updated successfully');
-        } else {
-          console.log('⚠️ Suggestion is the same as original text');
         }
-      } else {
-        console.log('❌ No valid optimization result received:', result);
       }
-    } catch (error) {
-      console.error('❌ Failed to optimize text:', error);
+    } catch {
       // 不要让错误导致UI崩溃，只是记录错误
     } finally {
       setIsAIOptimizing(false);
-      console.log('=== Optimization process completed ===');
     }
   };
 
