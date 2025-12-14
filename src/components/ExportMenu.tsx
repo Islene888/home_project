@@ -78,7 +78,7 @@ export const ExportMenu = ({ editor, canvasRef }: ExportMenuProps) => {
       return;
     }
     const filename = getTimestampFilename("design");
-    void exportToPDF(canvasRef.current, filename);
+    void exportToPDF(canvasRef.current, editor.state.value, filename);
   };
 
   return (
