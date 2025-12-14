@@ -13,10 +13,18 @@ export interface TextSuggestion {
 }
 
 // 初始化 OpenAI 客户端
-const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // 注意：生产环境应该使用后端代理
-});
+let openai: OpenAI | null = null;
+
+try {
+  if (import.meta.env.VITE_OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true // 注意：生产环境应该使用后端代理
+    });
+  }
+} catch (error) {
+  console.warn('OpenAI client initialization failed:', error);
+}
 
 // 预定义的文字优化规则
 const improvementRules = [
@@ -130,6 +138,13 @@ const toneRules = {
 // 使用OpenAI API进行文字优化
 export async function optimizeText(text: string, options: TextOptimizationOptions): Promise<TextSuggestion> {
   console.log('optimizeText called with:', text, options);
+
+  // 如果没有OpenAI客户端或API密钥，直接使用备用方案
+  if (!openai || !import.meta.env.VITE_OPENAI_API_KEY) {
+    console.log('OpenAI not available, using fallback');
+    return fallbackOptimizeText(text, options);
+  }
+
   try {
     let prompt = "";
 
@@ -271,6 +286,12 @@ export async function getTextSuggestions(text: string): Promise<TextSuggestion[]
         reason: "Text is too short for AI analysis"
       }
     ];
+  }
+
+  // 如果没有OpenAI客户端，直接使用备用方案
+  if (!openai || !import.meta.env.VITE_OPENAI_API_KEY) {
+    console.log('OpenAI not available, using fallback suggestions');
+    return getFallbackSuggestions(text);
   }
 
   const suggestions: TextSuggestion[] = [];

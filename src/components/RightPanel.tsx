@@ -58,13 +58,27 @@ export const RightPanel = ({ editor }: RightPanelProps) => {
   // 处理异步优化操作
   const handleOptimizeText = async (action: "improve" | "shorten" | "expand" | "tone", tone?: "professional" | "casual" | "creative") => {
     if (!selectedText) return;
+
+    // 防止空文本或过短文本
+    if (!selectedText.content || selectedText.content.trim().length < 1) {
+      console.warn('Text content is empty or too short');
+      return;
+    }
+
     setIsAIOptimizing(true);
     try {
       const options = tone ? { action: action as "tone", tone } : { action: action as "improve" | "shorten" | "expand" };
       const result = await optimizeText(selectedText.content, options);
-      editor.updateTextContent(selectedText.id, result.suggestion);
+
+      // 确保结果有效
+      if (result && result.suggestion && result.suggestion !== selectedText.content) {
+        editor.updateTextContent(selectedText.id, result.suggestion);
+      } else {
+        console.log('No optimization suggestion received or suggestion is same as original');
+      }
     } catch (error) {
       console.error('Failed to optimize text:', error);
+      // 不要让错误导致UI崩溃，只是记录错误
     } finally {
       setIsAIOptimizing(false);
     }
